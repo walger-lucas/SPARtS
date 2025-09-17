@@ -1,0 +1,34 @@
+@startuml Reorganize
+start
+group Reorganize {
+ : Parse command;
+ note 
+"/operation/reorganize"
+end note
+ if(!output_bucket.empty) then 
+    : Send status message through web hook;
+    note
+    Status
+    ----
+    {
+    "state"  : "Reorganize"
+    "status" : "ERROR_OUTPUT_NOT_EMPTY"
+    }
+    end note
+    :Await OK Command;
+    : GOTO AwaitCommand State;
+    kill
+ endif
+ : reorganize_and_weight();
+: Send status message through web hook;
+note
+    Status
+    ----
+    {
+    "state"  : "Reorganize"
+    "status" : "OK"
+    }
+end note
+: Await OK Command;
+: GOTO AwaitCommand State;
+}

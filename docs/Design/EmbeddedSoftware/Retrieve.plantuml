@@ -1,0 +1,71 @@
+@startuml Retrieve
+start
+group Retrieve {
+ : Parse command;
+ note 
+"/operation/retrive?id=xxxx"
+end note
+ if(!output_bucket.empty) then 
+    : Send status message through web hook;
+    note
+    Status
+    ----
+    {
+    "state"  : "Retrieve"
+    "status" : "ERROR_OUTPUT_NOT_EMPTY"
+    }
+    end note
+    :Await OK Command;
+    : GOTO AwaitCommand State;
+    kill
+ endif
+
+ if (!bin(id).exists || bin(id).is_missing) then
+
+    : Send status message through web hook;
+    note
+    Status
+    ----
+    {
+    "state"  : "Retrieve"
+    "status" : "ERROR_BIN_NOT_FOUND"
+    }
+    end note 
+    :Await OK Command;
+    : GOTO AwaitCommand State;
+    kill
+endif
+
+: go to bin(id);
+: read bin rfid;
+if (bin(id) != rfid) then
+    : Send status message through web hook;
+    note
+    Status
+    ----
+    {
+    "state"  : "Retrieve"
+    "status" : "ERROR_BIN_MISMATCH"
+    }
+    end note 
+    :Await OK Command;
+    : GOTO AwaitCommand State;
+    kill
+endif
+: get_bin;
+: move bin to output_bucket;
+: store bin on output_bucket;
+: Send status message through web hook;
+note
+    Status
+    ----
+    {
+    "state"  : "Retrieve"
+    "status" : "OK"
+    }
+    end note
+    : Await OK Command;
+    : GOTO AwaitCommand State;
+}
+end
+@enduml

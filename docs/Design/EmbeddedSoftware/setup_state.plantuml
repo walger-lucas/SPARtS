@@ -1,0 +1,36 @@
+@startuml SETUP
+start
+group SETUP {
+: Start Drivers;
+: Start Flash; 
+: Start Wifi AP;
+: Load Configuration from flash;
+: Load Bins and Buckets from flash;
+: Instantiate System Main Object;
+: Instantiate Bins and Buckets;
+: Start Web Server;
+}
+group REMAP_REORG {
+: Recalibrate Platform Position;
+: remap_bins();
+: store new bins as empty;
+: store missing bins;
+: store current bins;
+: reorganize_bins();
+}
+group WAIT_CONN {
+: Await configure message;
+: Parse configuration;
+
+note
+        Config
+        ----
+        "image_processing_hook" : "x.x.x.x:xxxx/image_process"
+        "state_web_hook" : "x.x.x.x:xxxx/hook"
+        
+end note
+
+: Store configuration;
+}
+end
+@enduml

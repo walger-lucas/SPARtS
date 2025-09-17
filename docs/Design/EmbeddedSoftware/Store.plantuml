@@ -1,0 +1,56 @@
+@startuml Store
+start
+group Store {
+: Parse command;
+ note 
+"/operation/store"
+end note
+ if(output_bucket.empty) then 
+    : Send status message through web hook;
+    note
+    Status
+    ----
+    {
+    "state"  : "Store"
+    "status" : "ERROR_OUTPUT_EMPTY"
+    }
+    end note
+    :Await OK Command;
+    : GOTO AwaitCommand State;
+    kill
+ endif
+
+if(full()) then
+    : Send status message through web hook;
+    note
+    Status
+    ----
+    {
+    "state"  : "Store"
+    "status" : "ERROR_FULL"
+    }
+    end note
+    :Await OK Command;
+    : GOTO AwaitCommand State;
+    kill
+endif
+
+: go to output_bucket;
+: read bin rfid;
+: calculate best empty bin position;
+: move to best empty bin position;
+: store bin;
+: Send status message through web hook;
+note
+    Status
+    ----
+    {
+    "state"  : "Store"
+    "status" : "OK"
+    }
+    end note
+    : Await OK Command;
+    : GOTO AwaitCommand State;
+}
+end
+@enduml

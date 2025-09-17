@@ -1,0 +1,27 @@
+@startuml remap
+start 
+group Remap {
+ : Parse command;
+ note 
+ "/operation/remap"
+ end note
+ : remap();
+ : update missing buckets and new buckets;
+ if(!output_bucket.empty) then
+ : remap_output_bucket();
+ endif
+ : Send status message through web hook;
+note
+    Status
+    ----
+    {
+    "state"  : "Remap"
+    "status" : "OK"
+    }
+end note
+: Await OK Command;
+: GOTO AwaitCommand State;
+
+}
+end
+@enduml

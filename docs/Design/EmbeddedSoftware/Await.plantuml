@@ -1,0 +1,15 @@
+@startuml Await
+start
+group Await {
+    : Send status through web hook;
+    note
+        Status
+        ----
+        "state" : "awaiting_command"
+        "status" : "ok"
+    end note
+    : Wait Command;
+
+}
+end
+@enduml
