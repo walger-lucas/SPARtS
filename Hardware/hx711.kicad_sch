@@ -533,7 +533,7 @@
     (property "Reference" "J13" (at 52.705 43.18 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Value" "Conn_01x04_Socket" (at 52.705 40.64 0)
+    (property "Value" "Input_Esp" (at 52.705 40.64 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Footprint" "" (at 52.07 33.02 0)

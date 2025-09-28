@@ -1,0 +1,128 @@
+@startuml class_diagram
+
+class bin {
+    - rfid_id: int
+    - weight_empty: float
+    - weight_current: float
+    - type: string
+    - uses: int
+    + get_amount(): int 
+    + get_type(): string
+    + get_use():int
+    + set_type(string): void
+    + set_use(int): void
+    + set_weight(float): void
+    + set_weight_empty(float): void
+    + get_position_down(): [float,float]
+    + get_position_up(): [float,float]
+    + bin(type: string, weight_empty:float, weight_current:float, uses:int)
+}
+
+class bucket {
+    - id: int
+    - position : const [float,float]
+    - cur_bin : *bin
+    + get_position_up()
+    + get_position_down()
+    + bucket(id:int ,position: [float,float],  cur_bin: *bin)
+    ~ set_bin(bin: *bin): virtual void
+    + get_bin(): *bin
+    + is_empty(): virtual bool
+    + read_bin_rfid(): void
+
+}
+
+class output_bucket {
+    ~ set_bin(bin: *bin): void
+    + is_empty(): bool
+    + output_bucket(id: int, position: [float,float], cur_bin: *bin)
+}
+
+class storage
+{
+    - buckets: array<buckets,24>
+    - interface_bucket: output_bucket
+    - bins: vector<bins>
+    + update_interface(): void
+    + store(): status
+    + map(): void
+    + retrieve(rfid_id: int): status
+    + reorganize(): status
+    + get_bucket_by_rfid(rfid: int): *bucket
+    + get_bucket_by_id(id: int): *bucket
+    + get_buckets_by_type(type: string): vector<*bucket>
+    - move_to(source: *bucket,destination: * bucket, force: bool) : status
+}
+
+bucket "1" o- "0..1" bin : contains >
+bucket <|-- output_bucket
+
+storage *-- "24" bucket
+storage *-- "0..*" bin
+
+class SPARtS {
+    - storage: storage
+    - sparts_webserver: *sparts_webserver
+    - state: SPARtS_STATE
+    - status: SPARtS_STATUS
+    - events: event_group
+    + get_state(): SPARtS_STATE
+    + send_ok(): void
+    - reset_events(): void
+    + run(): void
+    + SPARtS()
+    + to_json(): string
+}
+
+SPARtS *-- storage
+
+class sparts_webserver {
+    + start(SPARtS: *SPARtS, webhook): void
+    + send_event(): void
+    + await_config(): config
+}
+SPARtS - sparts_webserver
+
+class cam_interface {
+    + setup(image_uri, wifi_ssid,wifi_password): bool
+    + analyze_image(): image_description
+}
+SPARtS --> cam_interface
+sparts_webserver --> cam_interface
+
+movement_control <-r- storage
+
+struct image_description {
+    + type: string
+    + amount: int
+    + mixed : bool
+    + to_json(): string
+}
+cam_interface . image_description
+
+class conveyor_control {
+    - current_position: int
+    + next_bin(): void
+    + calibrate(): void
+}
+
+conveyor_control <- SPARtS
+
+class movement_control {
+    - speed_movement: int
+    - speed_platform: int
+    - current_position: [float,float]
+    - platform_extended: bool
+    + get_position(): [float,float]
+    + move_to(x: float, y:float): void
+    + calibrate_movement(): void
+    + calibrate_platform(): void
+    + platform_extend():void 
+    + platform_retract(): void
+    + set_speed_movement(speed:int): void
+    + set_speed_platform(speed:int): void
+
+}
+
+
+@enduml
