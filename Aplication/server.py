@@ -41,17 +41,12 @@ def upload_image():
 def keyboard_control():
     #Function to control the saving state via the keyboard.
     global save_images
-    print("\n--- Server Control ---")
-    print("Press 's' to ENABLE image saving.")
-    print("Press 'd' to DISABLE image saving.")
-    print("Press 'q' to quit.")
-    print("----------------------\n")
 
     while True:
         try:
-            command = input("Enter command: ").lower()
+            command = input().lower()
             with lock:
-                if command == 's':
+                if command == 'e':
                     save_images = True
                     print("\n[STATE] Image saving ENABLED.\n")
                 elif command == 'd':
@@ -73,6 +68,12 @@ if __name__ == '__main__':
     # Get server host and port from environment variables, with defaults
     host = os.getenv('SERVER_HOST', '0.0.0.0')
     port = int(os.getenv('SERVER_PORT', 5000))
-
     print(f"Starting server on {host}:{port}")
+
+    print("\n================== Server Control ==================")
+    print("[!] Press 'e' to ENABLE image saving.")
+    print("[!] Press 'd' to DISABLE image saving.")
+    print("[!] Press 'q' to quit.")
+    print("====================================================\n")
+
     app.run(host=host, port=port)
