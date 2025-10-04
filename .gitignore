@@ -39,3 +39,23 @@
 
 # debug information files
 *.dwo
+
+#APLICATION SERVER - BEGIN==========================================
+# Ignore Python virtual environment and cache files
+venv/
+__pycache__/
+*.pyc
+
+# Ignore Python environment variables file
+aplication/.env
+#APLICATION SERVER - END============================================
+
+#ESPCAM - BEGIN=====================================================
+# Ignore Arduino/C++ credentials file
+SPARTsCam/include/credentials.hpp
+
+# Ignore Arduino build artifacts
+/build/
+*.o
+*.d
+#ESPCAM - END=======================================================
