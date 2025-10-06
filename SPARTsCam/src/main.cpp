@@ -115,16 +115,16 @@ void loop() {
     client.write(fb->buf, fb->len);
     client.print(tail);
 
-    //Serial.println("Image sent. Waiting for server response...");
+    Serial.println("Image sent. Waiting for server response...");
     
     //Wait for the server's response for a while.
-    /*long startTime = millis();
+    long startTime = millis();
     while (client.connected() && !client.available() && millis() - startTime < 3000) {
       delay(100);
-    }*/
+    }
 
     //Reads and prints the server response.
-    /*if (client.available()) {
+    if (client.available()) {
       Serial.println("--- Server Response ---");
       while (client.available()) {
         char c = client.read();
@@ -133,7 +133,7 @@ void loop() {
       Serial.println("-----------------------");
     } else {
       Serial.println("No response from server.");
-    }*/
+    }
 
     client.stop();
   } else {
