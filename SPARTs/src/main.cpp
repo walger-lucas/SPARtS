@@ -109,7 +109,17 @@ void setup() {
 void loop() {
   // Nothing here, tasks handle everything
 }*/
+
 #include <cam_protocol.h>
+#include "load_cell.h"
+
+/*GPIO ======================================= */
+const byte DOUT_PIN = 25; //Data pin (DT).
+const byte SCK_PIN = 26;  //Clock pin (SCK).
+/*============================================ */
+
+LoadCell myLoadCell(DOUT_PIN, SCK_PIN);//Create LoadCell object.
+
 #ifdef CAM_MASTER
 void setup(){
   Serial.begin(115200); 
@@ -117,10 +127,31 @@ void setup(){
   cam::CamCommunicationMaster::setup_comm();
   cam::CamCommunicationMaster::send_config("","","",pdMS_TO_TICKS(30000));
   
+  delay(1000); //To stabilize the serial.
+  Serial.println("--- Load Cell Reader ---");
+
+  myLoadCell.setup();//Initializes the load cell.
+
+  Serial.println("Setup complete. Readings will start shortly.");
+  Serial.println("Send 't' via serial to tare the scale.");
 }
 void loop(){
+  /*UART test========*/
   vTaskDelay(pdMS_TO_TICKS(1000));
   cam::CamCommunicationMaster::process_image(pdMS_TO_TICKS(30000));
+  /*=================*/
+
+  if (Serial.available() > 0) {
+    char command = Serial.read();
+    if (command == 't' || command == 'T') {
+      myLoadCell.tare(); //Reset the scale.
+    }
+  }
+
+  float weight = myLoadCell.getWeight();
+  Serial.printf("Weight: %.2f g\n", weight); //Print the weight with 2 decimal places.
+
+  delay(1000); //Wait 1 second between readings.
 }
 #else
 
