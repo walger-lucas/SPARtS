@@ -5,6 +5,9 @@ StepMotor::StepMotor(/* args */)
 {
     current_x_position = 0;
     current_y_position = 0;
+    convenyor_position = 0;
+    end_x = 0;
+    end_y = 0;
 }
 
 StepMotor::~StepMotor()
@@ -15,13 +18,13 @@ void StepMotor::begin()
 {
     motorX = AccelStepper(AccelStepper::DRIVER, STEP_PIN_X, DIR_PIN_X);
     motorY = AccelStepper(AccelStepper::DRIVER, STEP_PIN_Y, DIR_PIN_Y);
-    motorConveyor = AccelStepper(AccelStepper::DRIVER, STEP_PIN_R, DIR_PIN_R);  
+    motorConvenyor = AccelStepper(AccelStepper::DRIVER, STEP_PIN_R, DIR_PIN_R);  
     motorX.setMaxSpeed(MAX_SPEED);
     motorX.setAcceleration(ACCELERATION);
     motorY.setMaxSpeed(MAX_SPEED);
     motorY.setAcceleration(ACCELERATION);
-    motorConveyor.setMaxSpeed(MAX_SPEED);
-    motorConveyor.setAcceleration(ACCELERATION);
+    motorConvenyor.setMaxSpeed(MAX_SPEED);
+    motorConvenyor.setAcceleration(ACCELERATION);
 
     pinMode(END_X_PIN, INPUT_PULLUP);
     pinMode(END_Y_PIN, INPUT_PULLUP);
@@ -114,19 +117,17 @@ void StepMotor::downBin(){
 
 void StepMotor::goToRetrieval()
 {
-    if (current_x_position != RETRIEVAL_POS_X)
-    {
-        int steps_x = (RETRIEVAL_POS_X - current_x_position) * STEPS_TO_BIN_H;
-        motorX.moveTo(steps_x);
-        motorX.runToPosition();
-        current_x_position = RETRIEVAL_POS_X;
+    goToBin(RETRIEVAL_POS_X, RETRIEVAL_POS_Y);
+}
+
+void StepMotor::convenyorNext(){
+    if (convenyor_position <= 3){
+        motorConvenyor.moveTo(CONVENYOR_STEPS);
+        motorConvenyor.runToPosition();
+        convenyor_position++;
     }
-    if (current_y_position != RETRIEVAL_POS_Y) 
-    {
-        int steps_y = (RETRIEVAL_POS_Y - current_y_position) * STEPS_TO_BIN_V;
-        motorY.moveTo(steps_y);
-        motorY.runToPosition();
-        current_y_position = RETRIEVAL_POS_Y;
-    }
-    
+}
+
+void StepMotor::convenyorStartPosition(){
+
 }

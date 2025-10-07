@@ -12,7 +12,9 @@
 #define DIR_PIN_R 14
 
 #define STEPS_TO_BIN_H 100
-#define STEPS_TO_BIN_V 150
+#define STEPS_TO_BIN_V -150
+
+#define CONVENYOR_STEPS 200
 
 #define MAX_SPEED 1000
 #define ACCELERATION 200
@@ -25,16 +27,20 @@
 #define END_X_PIN 34
 #define END_Y_PIN 35
 
+#define END_CONVENYOR_PIN 32 //COMFIRMAR PIN, NAO SEI QUAL É
+
 class StepMotor
 {
 private:
     int current_x_position;
     int current_y_position;
-    bool end_x;
-    bool end_y;
+    int convenyor_position;
+    int end_x;
+    int end_y;
+    int end_convenyor;
     AccelStepper motorX;
     AccelStepper motorY;
-    AccelStepper motorConveyor;
+    AccelStepper motorConvenyor;
 public:
     StepMotor();
     ~StepMotor();
@@ -44,6 +50,8 @@ public:
     void upBin();
     void downBin();
     void goToStartPosition();
+    void convenyorNext();
+    void convenyorStartPosition();
 
 };
 
