@@ -1,6 +1,6 @@
 @startuml class_diagram
 
-class bin {
+class Bin {
     - rfid_id: int
     - weight_empty: float
     - weight_current: float
@@ -15,54 +15,54 @@ class bin {
     + set_weight_empty(float): void
     + get_position_down(): [float,float]
     + get_position_up(): [float,float]
-    + bin(type: string, weight_empty:float, weight_current:float, uses:int)
+    + Bin(type: string, weight_empty:float, weight_current:float, uses:int)
 }
 
-class bucket {
+class Bucket {
     - id: int
     - position : const [float,float]
-    - cur_bin : *bin
+    - cur_Bin : *Bin
     + get_position_up()
     + get_position_down()
-    + bucket(id:int ,position: [float,float],  cur_bin: *bin)
-    ~ set_bin(bin: *bin): virtual void
-    + get_bin(): *bin
+    + Bucket(id:int ,position: [float,float],  cur_Bin: *Bin)
+    ~ set_Bin(Bin: *Bin): virtual void
+    + get_Bin(): *Bin
     + is_empty(): virtual bool
-    + read_bin_rfid(): void
+    + read_Bin_rfid(): void
 
 }
 
-class output_bucket {
-    ~ set_bin(bin: *bin): void
+class OutputBucket {
+    ~ set_Bin(Bin: *Bin): void
     + is_empty(): bool
-    + output_bucket(id: int, position: [float,float], cur_bin: *bin)
+    + OutputBucket(id: int, position: [float,float], cur_Bin: *Bin)
 }
 
-class storage
+class Storage
 {
-    - buckets: array<buckets,24>
-    - interface_bucket: output_bucket
-    - bins: vector<bins>
+    - Buckets: array<Buckets,24>
+    - interface_Bucket: OutputBucket
+    - Bins: vector<Bins>
     + update_interface(): void
     + store(): status
     + map(): void
     + retrieve(rfid_id: int): status
     + reorganize(): status
-    + get_bucket_by_rfid(rfid: int): *bucket
-    + get_bucket_by_id(id: int): *bucket
-    + get_buckets_by_type(type: string): vector<*bucket>
-    - move_to(source: *bucket,destination: * bucket, force: bool) : status
+    + get_Bucket_by_rfid(rfid: int): *Bucket
+    + get_Bucket_by_id(id: int): *Bucket
+    + get_Buckets_by_type(type: string): vector<*Bucket>
+    - move_to(source: *Bucket,destination: * Bucket, force: bool) : status
 }
 
-bucket "1" o- "0..1" bin : contains >
-bucket <|-- output_bucket
+Bucket "1" o- "0..1" Bin : contains >
+Bucket <|-- OutputBucket
 
-storage *-- "24" bucket
-storage *-- "0..*" bin
+Storage *-- "24" Bucket
+Storage *-- "0..*" Bin
 
 class SPARtS {
-    - storage: storage
-    - sparts_webserver: *sparts_webserver
+    - Storage: Storage
+    - SpartWebserver: *SpartWebserver
     - state: SPARtS_STATE
     - status: SPARtS_STATUS
     - events: event_group
@@ -74,41 +74,41 @@ class SPARtS {
     + to_json(): string
 }
 
-SPARtS *-- storage
+SPARtS *-- Storage
 
-class sparts_webserver {
+class SpartWebserver {
     + start(SPARtS: *SPARtS, webhook): void
     + send_event(): void
     + await_config(): config
 }
-SPARtS - sparts_webserver
+SPARtS - SpartWebserver
 
-class cam_interface {
-    + setup(image_uri, wifi_ssid,wifi_password): bool
-    + analyze_image(): image_description
+class CamCommunicationMaster {
+    + setup_comm(image_uri, wifi_ssid,wifi_password): CamStatus
+    + analyze_image(): CamResult
 }
-SPARtS --> cam_interface
-sparts_webserver --> cam_interface
+SPARtS --> CamCommunicationMaster
+SpartWebserver --> CamCommunicationMaster
 
-movement_control <-r- storage
+MovementControl <-r- Storage
 
-struct image_description {
+struct CamResult {
     + type: string
     + amount: int
     + mixed : bool
     + to_json(): string
 }
-cam_interface . image_description
+CamCommunicationMaster . CamResult
 
-class conveyor_control {
+class ConveyorControl {
     - current_position: int
-    + next_bin(): void
+    + next_Bin(): void
     + calibrate(): void
 }
 
-conveyor_control <- SPARtS
+ConveyorControl <- SPARtS
 
-class movement_control {
+class MovementControl {
     - speed_movement: int
     - speed_platform: int
     - current_position: [float,float]
