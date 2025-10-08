@@ -13,44 +13,43 @@ class Bin {
     + set_use(int): void
     + set_weight(float): void
     + set_weight_empty(float): void
-    + get_position_down(): [float,float]
-    + get_position_up(): [float,float]
+    + get_position(): [float,float]
     + Bin(type: string, weight_empty:float, weight_current:float, uses:int)
 }
 
 class Bucket {
     - id: int
     - position : const [float,float]
-    - cur_Bin : *Bin
+    - cur_bin : *Bin
     + get_position_up()
     + get_position_down()
-    + Bucket(id:int ,position: [float,float],  cur_Bin: *Bin)
-    ~ set_Bin(Bin: *Bin): virtual void
-    + get_Bin(): *Bin
+    + Bucket(id:int ,position: [float,float],  cur_bin: *Bin)
+    ~ set_bin(Bin: *Bin): virtual void
+    + get_bin(): *Bin
     + is_empty(): virtual bool
-    + read_Bin_rfid(): void
+    + read_bin_rfid(): void
 
 }
 
 class OutputBucket {
-    ~ set_Bin(Bin: *Bin): void
+    ~ set_bin(Bin: *Bin): void
     + is_empty(): bool
-    + OutputBucket(id: int, position: [float,float], cur_Bin: *Bin)
+    + OutputBucket(id: int, position: [float,float], cur_bin: *Bin)
 }
 
 class Storage
 {
-    - Buckets: array<Buckets,24>
-    - interface_Bucket: OutputBucket
+    - Buckets: array<Bucket,24>
+    - interface_bucket: OutputBucket
     - Bins: vector<Bins>
     + update_interface(): void
     + store(): status
     + map(): void
     + retrieve(rfid_id: int): status
     + reorganize(): status
-    + get_Bucket_by_rfid(rfid: int): *Bucket
-    + get_Bucket_by_id(id: int): *Bucket
-    + get_Buckets_by_type(type: string): vector<*Bucket>
+    + get_bucket_by_rfid(rfid: int): *Bucket
+    + get_bucket_by_id(id: int): *Bucket
+    + get_buckets_by_type(type: string): vector<*Bucket>
     - move_to(source: *Bucket,destination: * Bucket, force: bool) : status
 }
 
@@ -61,7 +60,7 @@ Storage *-- "24" Bucket
 Storage *-- "0..*" Bin
 
 class SPARtS {
-    - Storage: Storage
+    - storage: Storage
     - SpartWebserver: *SpartWebserver
     - state: SPARtS_STATE
     - status: SPARtS_STATUS
@@ -102,7 +101,7 @@ CamCommunicationMaster . CamResult
 
 class ConveyorControl {
     - current_position: int
-    + next_Bin(): void
+    + next_bin(): void
     + calibrate(): void
 }
 
@@ -117,8 +116,12 @@ class MovementControl {
     + move_to(x: float, y:float): void
     + calibrate_movement(): void
     + calibrate_platform(): void
-    + platform_extend():void 
-    + platform_retract(): void
+    + read():  optional<array<uint8_t,12>>
+    + read_fetch(): optional<array<uint8_t,12>>
+    + fetch(): void
+    + store(): void
+    - platform_extend():void 
+    - platform_retract(): void
     + set_speed_movement(speed:int): void
     + set_speed_platform(speed:int): void
 

@@ -1,0 +1,23 @@
+@startuml
+title MOVE_TO FUNCTION
+start
+: GO END_POS;
+: READ END_POS RFID;
+if (!empty) then 
+    :Return Error ;
+    end
+endif
+: GO START_POS;
+: READ START_POS;
+if (empty) then 
+    :Return Error ;
+    end
+endif
+
+: FETCH START_POS;
+: GO END_POS;
+: STORE END_POS;
+
+end
+
+@enduml
