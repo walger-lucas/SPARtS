@@ -1,3 +1,5 @@
+
+#define IMAGE_SERVER
 #ifndef IMAGE_SERVER
 #include <Arduino.h>
 #include <cam_protocol.h>
