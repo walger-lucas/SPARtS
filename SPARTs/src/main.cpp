@@ -8,7 +8,6 @@ const byte SCK_PIN = 26;  //Clock pin (SCK).
 
 LoadCell myLoadCell(DOUT_PIN, SCK_PIN);//Create LoadCell object.
 
-#ifdef CAM_MASTER
 void setup(){
   Serial.begin(115200); 
   Serial.printf("start\n");
@@ -41,29 +40,3 @@ void loop(){
 
   delay(100); //Wait 0.1 second between readings.
 }
-#else
-
-void setup(){
-  Serial.begin(115200); 
-  Serial.printf("start\n");
-  cam::CamCommunicationSlave::setup_comm(GPIO_NUM_17,GPIO_NUM_16);
-  pinMode(4, OUTPUT);
-}
-
-void loop(){
-  switch(cam::CamCommunicationSlave::wait_for_message())
-  {
-    case cam::CamCommunicationSlave::IMAGE_TO_PROCESS:
-      cam::CamCommunicationSlave::send_result({.status=cam::CamStatus::PROCESS_OK},portMAX_DELAY);
-    break;
-        case cam::CamCommunicationSlave::SETUP_TO_PROCESS:
-      cam::CamCommunicationSlave::send_status(cam::CamStatus::PROCESS_OK,portMAX_DELAY);
-    break;
-
-  }
-  static bool out4 = false;
-  digitalWrite(4,out4);
-  out4 = !out4;
-}
-#endif
-

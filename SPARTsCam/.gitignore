@@ -5,3 +5,4 @@
 .vscode/ipch
 
 # Ignore credentials header file
+/include/credentials.hpp
