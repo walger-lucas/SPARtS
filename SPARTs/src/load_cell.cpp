@@ -1,15 +1,17 @@
 #include "load_cell.h"
 #include <HX711_ADC.h>
 
-// --- FATOR DE CALIBRAÇÃO ---
-// Este valor é CRUCIAL. Você precisará encontrar o seu.
-// 1. Deixe este valor como 1.0 inicialmente.
-// 2. Faça o upload do código e abra o Monitor Serial.
-// 3. Coloque um objeto de peso conhecido (ex: uma lata de 350g) na balança.
-// 4. Anote o valor que aparece no monitor (ex: -123456.0).
-// 5. Calcule o novo fator: new_factor = (valor_lido / peso_conhecido) -> (-123456 / 350) = -352.7
-// 6. Atualize a constante abaixo com o seu novo fator (negativo se necessário).
-const float CALIBRATION_FACTOR = -350.0; // <-- MUDE ESTE VALOR
+/*=========================================
+            CALIBRATION FACTOR
+===========================================
+    1. Leave this value as 1.0 initially.
+    2. Upload the code and open the Serial Monitor.
+    3. Place a known weight (e.g., a 350g can) on the scale.
+    4. Note the value shown on the monitor (e.g., -123456.0).
+    5. Calculate the new factor: new_factor = (measured_value / known_weight) -> (-123456 / 350) = -352.7
+    6. Update the constant below with your new factor (negative if necessary).
+=========================================*/
+const float CALIBRATION_FACTOR = 1671.625; // <-- CHANGE THIS VALUE
 
 //Class constructor.
 LoadCell::LoadCell(const byte pinDout, const byte pinSck)

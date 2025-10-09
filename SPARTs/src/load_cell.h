@@ -1,6 +1,15 @@
 #ifndef LOADCELL_HPP
 #define LOADCELL_HPP
 
+/*=========================================
+            HX711/ESP Conection
+===========================================
+    VCC → 3.3V
+    GND → GND
+    DT  → GPIO 25
+    SCK → GPIO 26
+=========================================*/
+
 #include <Arduino.h>
 
 class HX711_ADC;

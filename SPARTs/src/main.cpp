@@ -137,8 +137,8 @@ void setup(){
 }
 void loop(){
   /*UART test========*/
-  vTaskDelay(pdMS_TO_TICKS(1000));
-  cam::CamCommunicationMaster::process_image(pdMS_TO_TICKS(30000));
+  //vTaskDelay(pdMS_TO_TICKS(1000));
+  //cam::CamCommunicationMaster::process_image(pdMS_TO_TICKS(30000));
   /*=================*/
 
   if (Serial.available() > 0) {
@@ -151,7 +151,7 @@ void loop(){
   float weight = myLoadCell.getWeight();
   Serial.printf("Weight: %.2f g\n", weight); //Print the weight with 2 decimal places.
 
-  delay(1000); //Wait 1 second between readings.
+  delay(100); //Wait 0.1 second between readings.
 }
 #else
 
