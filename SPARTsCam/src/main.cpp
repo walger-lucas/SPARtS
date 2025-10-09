@@ -1,6 +1,7 @@
-// #ifndef IMAGE_SERVER
-// #include <Arduino.h>
-// #include <cam_protocol.h>
+//#define IMAGE_SERVER
+//#ifndef IMAGE_SERVER
+//#include <Arduino.h>
+//#include <cam_protocol.h>
 
 // cam::CamStatus setup_wifi(const char ssid[30], const char password[30],const char image_process_uri[60])
 // {

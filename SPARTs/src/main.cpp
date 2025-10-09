@@ -109,9 +109,8 @@ void setup() {
 void loop() {
   // Nothing here, tasks handle everything
 }*/
-
 #include <cam_protocol.h>
-#include "load_cell.h"
+include "load_cell.h"
 
 /*GPIO ======================================= */
 const byte DOUT_PIN = 25; //Data pin (DT).
@@ -178,3 +177,4 @@ void loop(){
   out4 = !out4;
 }
 #endif
+
