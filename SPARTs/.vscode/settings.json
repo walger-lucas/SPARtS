@@ -1,3 +1,7 @@
 {
-    "cmake.sourceDirectory": "C:/Users/LWN/Documents/OF3/SPARtS/SPARTs/.pio/libdeps/esp_wroom_02/ArduinoJson/src"
+    "cmake.sourceDirectory": "C:/Users/LWN/Documents/OF3/SPARtS/SPARTs/.pio/libdeps/esp_wroom_02/ArduinoJson/src",
+    "files.associations": {
+        "array": "cpp",
+        "random": "cpp"
+    }
 }
