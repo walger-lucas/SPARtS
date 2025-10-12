@@ -1,5 +1,4 @@
-#include <AccelStepper.h>
-#include "StepMotor.h"
+#include "Controls.h"
 
 // Definição dos pinos (motor esquerdo)
 #define STEP_LEFT 25
@@ -9,13 +8,17 @@
 #define STEP_RIGHT 27
 #define DIR_RIGHT 14
 
-StepMotor stepMotor;
-
+controls::ConveyorControl conveyor;
 
 void setup() {
   Serial.begin(115200);
+  
   // Configuração dos motores
-  stepMotor.begin();
+  delay(1000);
+  conveyor.start();
+  delay(1000);
+  conveyor.next();
+  /*
   stepMotor.goToBin(2,2);
   delay(2000);
   stepMotor.goToBin(0,0);
@@ -24,12 +27,14 @@ void setup() {
   delay(2000);
   stepMotor.goToBin(0,0);
   delay(2000);
-  stepMotor.goToBin(5,5);
+  stepMotor.goToBin(5,5);*/
 }
 
 void loop() {
   // StepMotor stepMotor;
-  // stepMotor.goToBin(2,2);
-  // delay(2000);
+  //stepMotor.goToBin(2,2);
+  delay(5000);
+  conveyor.next();
+  
   // stepMotor.goToBin(3,3);
 }
