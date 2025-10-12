@@ -1,3 +1,149 @@
+
+//#define IMAGE_SERVER
+#ifndef IMAGE_SERVER
+#include <Arduino.h>
+#include <ArduinoJson.h>
+#include <cam_protocol.h>
+#include <WiFi.h>
+#include "esp_camera.h"
+#include <HTTPClient.h>
+
+#define PWDN_GPIO_NUM     32
+#define RESET_GPIO_NUM    -1
+#define XCLK_GPIO_NUM      0
+#define SIOD_GPIO_NUM     26
+#define SIOC_GPIO_NUM     27
+#define Y9_GPIO_NUM       35
+#define Y8_GPIO_NUM       34
+#define Y7_GPIO_NUM       39
+#define Y6_GPIO_NUM       36
+#define Y5_GPIO_NUM       21
+#define Y4_GPIO_NUM       19
+#define Y3_GPIO_NUM       18
+#define Y2_GPIO_NUM        5
+#define VSYNC_GPIO_NUM    25
+#define HREF_GPIO_NUM     23
+#define PCLK_GPIO_NUM     22
+String serverUrl= "";
+
+cam::CamStatus setup_wifi(const char ssid[30], const char password[30],const char image_process_uri[60])
+{
+  cam::CamStatus status = cam::CamStatus::PROCESS_OK;
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi...");
+  uint32_t timeout_ms = 5000;
+  uint32_t start = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - start < timeout_ms) {
+    delay(10);
+  }
+
+  if(WiFi.status()!= WL_CONNECTED)
+    cam::CamStatus status = cam::CamStatus::TIMEOUT;
+
+  serverUrl = image_process_uri;
+
+  return status;
+}
+cam::CamResult process_image()
+{
+  cam::CamResult result = {.status = cam::CamStatus::TIMEOUT,.item_code = 1,.item_quantity=10,.mixed=false};
+  digitalWrite(4,HIGH); // LED ON
+  delay(20);
+   camera_fb_t * fb = esp_camera_fb_get();
+    if (!fb) {
+      return result;
+    }
+    if (WiFi.status() != WL_CONNECTED) {
+      esp_camera_fb_return(fb);
+      return result;
+  }
+  delay(20);
+  digitalWrite(4,LOW);
+  HTTPClient http;
+  http.begin(serverUrl);
+  http.addHeader("Content-Type", "image/jpeg");
+
+  // Send binary buffer directly
+  int httpResponseCode = http.POST(fb->buf, fb->len);
+  esp_camera_fb_return(fb);
+  if (httpResponseCode <= 0 || httpResponseCode != HTTP_CODE_OK ) {
+    http.end();
+    return result;
+  }
+  
+  String payload = http.getString();
+  http.end();
+
+  StaticJsonDocument<512> doc;
+  //if error deserializing
+  if(deserializeJson(doc, payload))
+  {
+      return result;
+  }
+
+  if(doc.containsKey("Type") && doc.containsKey("Amount") && doc.containsKey("Mixed"))
+  {
+    //result.item_code = str_to_item_code( doc["Type"].as<const char*>); TODO
+    result.item_quantity = doc["Amount"].as<uint16_t>();
+    result.mixed = doc["Mixed"].as<bool>();
+    result.status = cam::CamStatus::PROCESS_OK;
+  }
+  
+  return result;
+}
+
+
+
+
+void setup(){
+  camera_config_t config;
+  config.ledc_channel = LEDC_CHANNEL_0;
+  config.ledc_timer = LEDC_TIMER_0;
+  config.pin_d0 = Y2_GPIO_NUM;
+  config.pin_d1 = Y3_GPIO_NUM;
+  config.pin_d2 = Y4_GPIO_NUM;
+  config.pin_d3 = Y5_GPIO_NUM;
+  config.pin_d4 = Y6_GPIO_NUM;
+  config.pin_d5 = Y7_GPIO_NUM;
+  config.pin_d6 = Y8_GPIO_NUM;
+  config.pin_d7 = Y9_GPIO_NUM;
+  config.pin_xclk = XCLK_GPIO_NUM;
+  config.pin_pclk = PCLK_GPIO_NUM;
+  config.pin_vsync = VSYNC_GPIO_NUM;
+  config.pin_href = HREF_GPIO_NUM;
+  config.pin_sscb_sda = SIOD_GPIO_NUM;
+  config.pin_sscb_scl = SIOC_GPIO_NUM;
+  config.pin_pwdn = PWDN_GPIO_NUM;
+  config.pin_reset = RESET_GPIO_NUM;
+  config.xclk_freq_hz = 20000000;
+  config.pixel_format = PIXFORMAT_JPEG;
+  config.frame_size = FRAMESIZE_UXGA; // (1600x1200)
+  config.jpeg_quality = 10;
+  config.fb_count = 2;
+
+  cam::CamCommunicationSlave::setup_comm();
+  pinMode(4, OUTPUT);
+}
+void loop(){
+  static char ssid[30],pwd[30],hook[60];
+  switch(cam::CamCommunicationSlave::wait_for_message())
+  {
+    case cam::CamCommunicationSlave::IMAGE_TO_PROCESS:
+        cam::CamCommunicationSlave::send_result({.status=cam::CamStatus::PROCESS_OK},portMAX_DELAY);
+    break;
+    case cam::CamCommunicationSlave::SETUP_TO_PROCESS:
+        strcpy(ssid, cam::CamCommunicationSlave::ssid);
+        strcpy(pwd, cam::CamCommunicationSlave::pwd);
+        strcpy(hook, cam::CamCommunicationSlave::hook);
+        cam::CamCommunicationSlave::send_status(setup_wifi(ssid,pwd,hook),portMAX_DELAY);
+        break;
+    default:
+    break;
+  }
+  
+}
+
+#else 
 #include <Arduino.h>
 #include "esp_camera.h"
 #include <WiFi.h>
@@ -143,3 +289,4 @@ void loop() {
   esp_camera_fb_return(fb);
   delay(TIME_TO_TAKE_PHOTO);
 }
+#endif
