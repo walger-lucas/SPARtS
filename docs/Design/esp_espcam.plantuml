@@ -1,0 +1,30 @@
+@startuml
+== Setup ==
+activate Esp
+Esp -> Cam : Setup(SSID,PWD,IMAGE_PROCESSING_END_POINT)
+activate Cam
+deactivate Esp
+
+
+Cam -> Esp : Setup_Ok / Fail
+deactivate Cam
+activate Esp
+
+== Capture Image ==
+
+Esp -> Cam : Capture()
+deactivate Esp
+activate Cam
+Cam -> ImageProcessServer: SendImage()
+deactivate Cam
+activate ImageProcessServer
+ImageProcessServer -> ImageProcessServer: ProcessImage()
+ImageProcessServer --> Cam : {item_type,quantity,mixed}
+deactivate ImageProcessServer
+activate Cam
+Cam --> Esp : {status,item_type,quantity,mixed}
+deactivate Cam
+activate Esp
+
+
+@enduml

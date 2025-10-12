@@ -18,30 +18,29 @@ class Bin {
 }
 
 class Bucket {
-    - id: int
     - position : const [float,float]
-    - cur_bin : *Bin
+    - cur_bin : weak_ptr<Bin>
     + get_position_up()
     + get_position_down()
-    + Bucket(id:int ,position: [float,float],  cur_bin: *Bin)
-    ~ set_bin(Bin: *Bin): virtual void
-    + get_bin(): *Bin
+    + Bucket(id:int ,position: [float,float],  weak_ptr<Bin>)
+    ~ set_bin(weak_ptr<Bin>): virtual void
+    + get_bin(): shared_ptr<Bin>
     + is_empty(): virtual bool
     + read_bin_rfid(): void
 
 }
 
 class OutputBucket {
-    ~ set_bin(Bin: *Bin): void
+    ~ set_bin(weak_ptr<Bin>): void
     + is_empty(): bool
     + OutputBucket(id: int, position: [float,float], cur_bin: *Bin)
 }
 
 class Storage
 {
-    - Buckets: array<Bucket,24>
+    - buckets: array<Bucket,24>
     - interface_bucket: OutputBucket
-    - Bins: vector<Bins>
+    - bins: vector<shared_ptr<Bins>>
     + update_interface(): void
     + store(): status
     + map(): void
@@ -50,7 +49,9 @@ class Storage
     + get_bucket_by_rfid(rfid: int): *Bucket
     + get_bucket_by_id(id: int): *Bucket
     + get_buckets_by_type(type: string): vector<*Bucket>
-    - move_to(source: *Bucket,destination: * Bucket, force: bool) : status
+    + serialize(): void
+    - desserialize(): void
+    - move_to(src: *Bucket,dst: * Bucket, force: bool) : status
 }
 
 Bucket "1" o- "0..1" Bin : contains >
