@@ -127,7 +127,7 @@ namespace storage
             }
         }
         rfid_t rfid;
-        mov_control.xy_table.moveTo(src->getPos());
+        mov_control.xy_table.moveTo(src->getPos(),controls::Speed::FAST);
         if(!mov_control.readAndFetch(rfid))
             return true;
         mov_control.xy_table.moveTo(dst->getPos(),controls::Speed::MEDIUM);
@@ -195,6 +195,7 @@ namespace storage
 
     Storage::OperationStatus Storage::map()
     {
+        mov_control.xy_table.calibrate();
         for(auto bucket : buckets)
             readBucket(&bucket);
         readBucket(&interface_bucket);
