@@ -8,11 +8,10 @@
 #define STEP_RIGHT 27
 #define DIR_RIGHT 14
 
-controls::ConveyorControl conveyor;
+controls::ConveyorControl conveyor{};
 
 void setup() {
   Serial.begin(115200);
-  
   // Configuração dos motores
   delay(1000);
   conveyor.start();
