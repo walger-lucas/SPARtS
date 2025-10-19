@@ -7,6 +7,7 @@
 #include <WiFi.h>
 #include "esp_camera.h"
 #include <HTTPClient.h>
+#include "Item.h"
 
 #define PWDN_GPIO_NUM     32
 #define RESET_GPIO_NUM    -1
@@ -81,11 +82,12 @@ cam::CamResult process_image()
       return result;
   }
 
-  if(doc.containsKey("Type") && doc.containsKey("Amount") && doc.containsKey("Mixed"))
+  if(doc.containsKey("item_name") && doc.containsKey("amount") && doc.containsKey("mixed"))
   {
-    //result.item_code = str_to_item_code( doc["Type"].as<const char*>); TODO
-    result.item_quantity = doc["Amount"].as<uint16_t>();
-    result.mixed = doc["Mixed"].as<bool>();
+    String name = doc["item_name"];
+    result.item_code = Item::getId(name);
+    result.item_quantity = doc["amount"].as<uint16_t>();
+    result.mixed = doc["mixed"].as<bool>();
     result.status = cam::CamStatus::PROCESS_OK;
   }
   

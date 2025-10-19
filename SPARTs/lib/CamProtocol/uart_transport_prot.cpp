@@ -161,7 +161,7 @@ void TransportProt::poll(uint8_t* buffer,size_t buffer_len)
     uint8_t mac_buffer[512];
     if(message_size+3 >= 256)
         return;
-    Serial.printf("sent id: %d, seq %d, ack %d, force %d\n cur_seq %d, cur_ack %d\n",id,seq,ack,force,seq_num,ack_num);
+    //Serial.printf("sent id: %d, seq %d, ack %d, force %d\n cur_seq %d, cur_ack %d\n",id,seq,ack,force,seq_num,ack_num);
     message_buffer[0] = (force? 0b100:00) | (ack? 0b10:0b00) | (seq ? 0b1 : 0b0);
     message_buffer[1] = id;
     memcpy(message_buffer+2,message,message_size);

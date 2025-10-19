@@ -94,7 +94,7 @@ namespace storage
         }
     }
 
-    bool Storage::move(Bucket* src, Bucket* dst,bool force = false)
+    bool Storage::move(Bucket* src, Bucket* dst,bool force)
     {
         if(!src || !dst || src==dst)
             return true;
@@ -199,6 +199,7 @@ namespace storage
         for(auto bucket : buckets)
             readBucket(&bucket);
         readBucket(&interface_bucket);
+        return OperationStatus::OK;
     }
 
     Bucket* Storage::getBucketByRfid(rfid_t& rfid)
@@ -277,7 +278,9 @@ namespace storage
                 return ERROR_FULL;    
                
         }
-        //see if needs reorganizing, with OK;
+        
+        if(needsReorganizing())
+            return OK_NEEDS_REORGANIZING;
         return OK;
     }
     Storage::OperationStatus Storage::retrieve(rfid_t& rfid)
@@ -313,6 +316,8 @@ namespace storage
             bin->setUses(bin->getUses()+1);
         }
         //check if needs reorganizing
+        if(needsReorganizing())
+            return OK_NEEDS_REORGANIZING;
         return OK;
     }
 
@@ -330,6 +335,7 @@ namespace storage
             if(b.isEmpty())
                 return &b;
         }
+        return nullptr;
     }
 
     bool Storage::needsReorganizing()
@@ -339,17 +345,46 @@ namespace storage
     }
     void Storage::init()
     {
-        SPIFFS.begin(true,"/data");
+        SPIFFS.begin(true,"/spiffs");
         //start spiffs
-        //set all buckets,
+        int offset_x=0, offset_y=0;
+        int x_positions[] = {20,332,635,938,1243};
+        int y_positions[] = {20,400,700,1000,1300,1600};
+
+        buckets[0] = Bucket({x_positions[2],y_positions[5]});
+        buckets[1] = Bucket({x_positions[3],y_positions[5]});
+        buckets[2] = Bucket({x_positions[4],y_positions[5]});
+        buckets[3] = Bucket({x_positions[4],y_positions[4]});
+        buckets[4] = Bucket({x_positions[3],y_positions[4]});
+        buckets[5] = Bucket({x_positions[2],y_positions[4]});
+        buckets[6] = Bucket({x_positions[2],y_positions[3]});
+        buckets[7] = Bucket({x_positions[3],y_positions[3]});
+        buckets[8] = Bucket({x_positions[4],y_positions[3]});
+        buckets[9] = Bucket({x_positions[4],y_positions[2]});
+        buckets[10] = Bucket({x_positions[3],y_positions[2]});
+        buckets[11] = Bucket({x_positions[2],y_positions[2]});
+        buckets[12] = Bucket({x_positions[1],y_positions[2]});
+        buckets[13] = Bucket({x_positions[0],y_positions[2]});
+        buckets[14] = Bucket({x_positions[0],y_positions[1]});
+        buckets[15] = Bucket({x_positions[1],y_positions[1]});
+        buckets[16] = Bucket({x_positions[2],y_positions[1]});
+        buckets[17] = Bucket({x_positions[3],y_positions[1]});
+        buckets[18] = Bucket({x_positions[4],y_positions[1]});
+        buckets[19] =  Bucket({x_positions[4],y_positions[0]});
+        buckets[20] = Bucket({x_positions[3],y_positions[0]});
+        buckets[21] = Bucket({x_positions[2],y_positions[0]});
+        buckets[22] = Bucket({x_positions[1],y_positions[0]});
+        buckets[23] = Bucket({x_positions[0],y_positions[0]});
+        interface_bucket = OutputBucket({20,1400});
+
         desserialize();
         mov_control.init();
-        map();
+        //map();
     }
 
     void Storage::desserialize()
     {
-        std::ifstream file("/data/bins",std::ios::binary);
+        std::ifstream file("/spiffs/bins",std::ios::binary);
         if(!file)
             return;
 
@@ -371,7 +406,7 @@ namespace storage
     }
     void Storage::serialize()
     {
-        std::ofstream file("/data/bins",std::ios::binary);
+        std::ofstream file("/spiffs/bins",std::ios::binary);
         if(!file)
             return;
         for(auto& b : bins)
@@ -387,5 +422,78 @@ namespace storage
         }
 
         
+    }
+
+    void Storage::getJson(String& json)
+    {
+        json = "{ \"bins\": [";
+        bool first = true;
+        int i = 0;
+        for(auto& buck : buckets)
+        {
+            if(buck.isEmpty())
+                continue;
+            if(!first)
+                json += ",";
+            first = false;
+            auto b = buck.getBin();
+            String item_name = Item::getName(b->getItemId());
+            json += "{";
+            json += "\"position\":";
+            json += String(i);
+            i++;
+            json += "\",";
+            json += "\"rfid\":\"";
+            for(auto byte : b->getRFID())
+            {
+                char buf[3];
+                sprintf(buf,"%02X",byte);
+                json += buf;
+            }
+            json += ",";
+            json += "\"item_name\":\"";
+            json += item_name;
+            json += "\",";
+            json += "\"amount\":";
+            json += String(b->getAmount());
+            json += ",";
+            json += "\"uses\":";
+            json += String(b->getUses());
+            json += "}";
+        }
+
+
+            if(!interface_bucket.isEmpty())
+            {
+                if(!first)
+                    json += ",";
+                first = false;
+                auto b = interface_bucket.getBin();
+                String item_name = Item::getName(b->getItemId());
+                json += "{";
+                json += "\"position\":";
+                json += String(i);
+                i++;
+                json += "\"rfid\":\"";
+                for(auto byte : b->getRFID())
+                {
+                    char buf[3];
+                    sprintf(buf,"%02X",byte);
+                    json += buf;
+                }
+                json += ",";
+                json += "\"item_name\":\"";
+                json += item_name;
+                json += "\",";
+                json += "\"amount\":";
+                json += String(b->getAmount());
+                json += ",";
+                json += "\"uses\":";
+                json += String(b->getUses());
+                json += "}";
+            }
+
+        json += "] }";
+
     }
 }

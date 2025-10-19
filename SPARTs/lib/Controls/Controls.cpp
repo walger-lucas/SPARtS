@@ -23,37 +23,60 @@ namespace controls {
         }
     }
 
-    bool XYControl::moveTo(const Pos2i pos,const Speed speed)
+    bool XYControl::moveTo(const Pos2i pos,const Speed speed,bool reset)
     {
+
         int x {min(pos.x,MAX_X)};
         int y {min(pos.y,MAX_Y)};
+        printf("Moving to x:%d y:%d\n",x,y);
 
-        motorX.setMaxSpeed(getSpeed(speed));
-        motorY.setMaxSpeed(getSpeed(speed));
-        motorX.setAcceleration(getAcc(speed));
-        motorY.setAcceleration(getAcc(speed));
+        motorX.setMaxSpeed(getSpeed(speed)*2);
+        motorY.setMaxSpeed(getSpeed(speed)*2);
+        motorX.setAcceleration(getAcc(speed)*8);
+        motorY.setAcceleration(getAcc(speed)*8);
 
         motorX.moveTo(x);
-        motorY.moveTo(y);
+        
 
         bool endX {digitalRead(END_X_PIN)};
-        bool endY {digitalRead(END_Y_PIN)};
+        
 
         unsigned long start {millis()};
+        bool runX = true, runY = true;
+        
         do {
-            if(!endX)
+            runX = motorX.run();
+
+            if(!digitalRead(END_X_PIN)&&reset)
             {
-                motorX.setCurrentPosition(0);
-                motorX.moveTo(max(0,x));
+                delay(1);
+                if(!digitalRead(END_X_PIN))
+                {
+                    
+                    motorX.setCurrentPosition(0);
+                    motorX.moveTo(max(0,x));
+                }
             }
-            if(!endY)
+
+        } while((runX)&& (millis()-start)<TIMEOUT+3000);
+
+        motorY.moveTo(y);
+        bool endY {digitalRead(END_Y_PIN)};
+        do {         
+           
+           runY = motorY.run();
+
+           if(!digitalRead(END_Y_PIN)&&reset)
             {
-                motorY.setCurrentPosition(0);
-                motorY.moveTo(max(0,y));
+                delay(1);
+                if(!digitalRead(END_Y_PIN))
+                {
+                    motorY.setCurrentPosition(0);
+                    motorY.moveTo(max(0,y));
+                }
             }
-            endX = digitalRead(END_X_PIN);
-            endY = digitalRead(END_Y_PIN);
-        } while((motorX.run() || motorY.run())&& (millis()-start)<TIMEOUT);
+
+        } while((runY)&& (millis()-start)<TIMEOUT+3000);
         bool result = (millis()-start)<TIMEOUT;
         motorX.stop();
         motorY.stop();
@@ -62,7 +85,17 @@ namespace controls {
 
     bool XYControl::calibrate()
     {
-        return moveTo({-20000,-20000},Speed::SLOW);
+        delay(1000);
+
+        bool rt = moveTo({-20000,-20000},Speed::MEDIUM,true);
+        delay(100);
+        motorX.move(-50);
+        motorY.move(-50);
+        motorX.runToPosition();
+        motorY.runToPosition();
+        motorX.setCurrentPosition(0);
+        motorY.setCurrentPosition(0);
+        return rt;
     }
 
     XYControl::XYControl()
@@ -141,24 +174,36 @@ namespace controls {
         return cur_pos;
     }
 
-    bool PlatformControl::getSpeed(Direction dir,Speed speed)
+    int PlatformControl::getSpeed(Direction dir,Speed speed)
     {
+        return (dir == Direction::EXTEND)? 180 : 0;
         int signal = (dir == Direction::EXTEND)? 1 : -1;
         switch (speed)
         {
-        case Speed::SLOW: return 90 + signal*MAX_SPEED/4;
-        case Speed::MEDIUM: return 90 + signal*MAX_SPEED/2;
-        case Speed::FAST: return 90 + signal*MAX_SPEED;
-        default:    return 90 + signal*MAX_SPEED/2;
+        case Speed::SLOW: return (90 + signal*MAX_SPEED*3.5/4);
+        case Speed::MEDIUM: return (90 + signal*MAX_SPEED*3.5/4);
+        case Speed::FAST: return (90 + signal*MAX_SPEED);
+        default:    return (90 + signal*MAX_SPEED);
         }
     }
 
     PlatformControl::PlatformControl()
     {
+
+    }
+
+    void PlatformControl::setup()
+    {
         ESP32PWM::allocateTimer(0);
+        ESP32PWM::allocateTimer(1);
+        ESP32PWM::allocateTimer(2);
+        ESP32PWM::allocateTimer(3);
 
         pos = Direction::EXTEND;
+        pinMode(23,OUTPUT);
         servo.attach(SERVO_PIN,500,2400);
+        servo.setPeriodHertz(50); 
+        servo.write(90);
         pinMode(END_PIN,INPUT_PULLUP);
     }
     bool PlatformControl::onEnd()
@@ -168,20 +213,28 @@ namespace controls {
     bool PlatformControl::calibrate()
     {
         pos = Direction::EXTEND;
-        return move(Direction::RETRACT,Speed::SLOW);
+        servo.write(getSpeed(Direction::EXTEND,Speed::FAST));
+        delay(400);
+        servo.write(90);
+        return move(Direction::RETRACT,Speed::MEDIUM);
     }
 
     bool PlatformControl::move(Direction dir, Speed speed)
     {
         if(pos==dir)
-            return true;
-
-        servo.write(getSpeed(dir,speed));
+           return true;
+        delay(500);
         unsigned long start = millis();
-        if(!onEnd())
-            delay(100);
+        servo.write(getSpeed(dir,speed));
+        if(onEnd())
+        {
+            delay(700);   
+            //while(onEnd() && millis()-start < 1500){};
+        }
+        //servo.write(getSpeed(dir,Speed::FAST));
         while(!onEnd() && millis()-start< TIMEOUT){};
         servo.write(90);
+        
         if(millis()-start >= TIMEOUT)
         {
             pos = Direction::EXTEND;
@@ -194,17 +247,14 @@ namespace controls {
 
     void MovementControl::fetch()
     {
-        Pos2i initial = xy_table.getPos();
-        platform.move(PlatformControl::Direction::EXTEND,Speed::FAST);
-        xy_table.moveTo(initial+Pos2i{0,STEPS_TO_UP_BIN},Speed::SLOW);
-        platform.move(PlatformControl::Direction::RETRACT,Speed::SLOW);
-        xy_table.moveTo(initial);
+        rfid_t rfid;
+        readAndFetch(rfid);
     }
 
     void MovementControl::store(){
         Pos2i initial = xy_table.getPos();
         xy_table.moveTo(initial+Pos2i{0,STEPS_TO_UP_BIN},Speed::MEDIUM);
-        platform.move(PlatformControl::Direction::EXTEND,Speed::SLOW);
+        platform.move(PlatformControl::Direction::EXTEND,Speed::MEDIUM);
         xy_table.moveTo(initial,Speed::SLOW);
         platform.move(PlatformControl::Direction::RETRACT,Speed::FAST);
     }
@@ -220,10 +270,13 @@ namespace controls {
             rfid_read = true;
             rfid.fill(0);
             for(int i =0;i<mfrc522.uid.size;i++)
-                rfid[0] = mfrc522.uid.uidByte[i];
+                rfid[i] = mfrc522.uid.uidByte[i];
+            mfrc522.PICC_HaltA();
+            mfrc522.PCD_StopCrypto1();
         }
         xy_table.moveTo(initial);
         platform.move(PlatformControl::Direction::RETRACT,Speed::FAST);
+
         return rfid_read;
     }
 
@@ -239,10 +292,13 @@ namespace controls {
             rfid_read = true;
             rfid.fill(0);
             for(int i =0;i<mfrc522.uid.size;i++)
-                rfid[0] = mfrc522.uid.uidByte[i];
+                rfid[i] = mfrc522.uid.uidByte[i];
+            mfrc522.PICC_HaltA();
+            mfrc522.PCD_StopCrypto1();
         }
         platform.move(PlatformControl::Direction::RETRACT,Speed::SLOW);
         xy_table.moveTo(initial);
+
         return rfid_read;
     }
 
@@ -257,7 +313,9 @@ namespace controls {
             rfid_read = true;
             rfid.fill(0);
             for(int i =0;i<mfrc522.uid.size;i++)
-                rfid[0] = mfrc522.uid.uidByte[i];
+                rfid[i] = mfrc522.uid.uidByte[i];
+            mfrc522.PICC_HaltA();
+            mfrc522.PCD_StopCrypto1();
         }
         xy_table.moveTo(initial);
         return rfid_read;  
@@ -265,6 +323,7 @@ namespace controls {
     
     void MovementControl::init()
     {
+        platform.setup();
         mfrc522.PCD_Init();
         platform.calibrate();
         xy_table.calibrate();        

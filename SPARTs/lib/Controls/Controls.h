@@ -38,10 +38,10 @@ inline Pos2i operator+(const Pos2i pos1,const Pos2i pos2)
 
 class XYControl {
 
-    static constexpr int ACCELERATION{200},MAX_SPEED{1000}, TIMEOUT {10000};
-    static constexpr int STEP_PIN_X {25}, DIR_PIN_X {33}, END_X_PIN{34};
-    static constexpr int STEP_PIN_Y {27}, DIR_PIN_Y {26}, END_Y_PIN{35};
-    static constexpr int MAX_Y {500}, MAX_X {500};
+    static constexpr int ACCELERATION{200},MAX_SPEED{700}, TIMEOUT {10000};
+    static constexpr int STEP_PIN_X {27}, DIR_PIN_X {26}, END_X_PIN{34};
+    static constexpr int STEP_PIN_Y {25}, DIR_PIN_Y {33}, END_Y_PIN{35};
+    static constexpr int MAX_Y {5000}, MAX_X {5000};
     static int getSpeed(const Speed speed);
     static int getAcc(const Speed speed);
 
@@ -51,20 +51,21 @@ class XYControl {
     public:
     XYControl();
     bool calibrate();
-    bool moveTo(const Pos2i pos, const Speed speed = Speed::MEDIUM);
+    bool moveTo(const Pos2i pos, const Speed speed = Speed::MEDIUM,bool reset = false);
     Pos2i getPos() {return Pos2i{motorX.currentPosition(),motorY.currentPosition()};};
 };
 
 class ConveyorControl{
     static constexpr int ACCELERATION{200},MAX_SPEED{1000},TIMEOUT{3000};
     static constexpr int STEP_PIN_R {13}, DIR_PIN_R {14}, END_CONVEYOR_PIN{32};
-    static constexpr int MAX_BIN {5};
+    
     static constexpr int CONVEYOR_STEPS {90};
     static constexpr int BEGIN_STEP_OFFSET {5};
 
     int cur_pos {0};
     AccelStepper motorConveyor;
     public:
+    static constexpr int MAX_BIN {5};
     ConveyorControl();
     bool start();
     bool next();
@@ -76,17 +77,18 @@ class PlatformControl
     public:
         enum class Direction{EXTEND,RETRACT};
     private:
-    static constexpr int TIMEOUT = 1000;
+    static constexpr int TIMEOUT = 5000;
     
     static constexpr int SERVO_PIN {23}, END_PIN{36}; //SENSOR_VP EP1;
     static constexpr int MAX_SPEED = 90;
-    static bool getSpeed(Direction dir, Speed speed);
+    static int getSpeed(Direction dir, Speed speed);
     Direction pos {Direction::RETRACT};
     bool onEnd();
     Servo servo;
     public:
 
     PlatformControl();
+    void setup();
     bool calibrate();
     bool move(Direction dir,Speed speed =Speed::MEDIUM);
     bool isExtended() {return pos == Direction::EXTEND;};
@@ -95,7 +97,7 @@ class PlatformControl
 using rfid_t = std::array<uint8_t,12> ;
 class MovementControl {
     private:
-    static constexpr int STEPS_TO_UP_BIN {50};
+    static constexpr int STEPS_TO_UP_BIN {100};
     MFRC522DriverPinSimple pin{15};
     SPIClass &spiClass = SPI;
     const SPISettings spiSettings = SPISettings(SPI_CLOCK_DIV4, MSBFIRST, SPI_MODE0); // May have to be set if hardware is not fully compatible to Arduino specifications.

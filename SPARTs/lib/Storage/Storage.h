@@ -3,6 +3,7 @@
 #include <memory>
 #include <array>
 #include <vector>
+#include <Item.h>
 
 namespace storage
 {
@@ -38,7 +39,7 @@ class Bucket
 
     public:
 
-    Bucket(controls::Pos2i pos,std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
+    Bucket(controls::Pos2i pos = (controls::Pos2i){0,0},std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
 
     virtual void setBin(std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
     virtual bool isEmpty();
@@ -50,14 +51,14 @@ class Bucket
 
 class OutputBucket: public Bucket {
     public:
-    OutputBucket(controls::Pos2i pos,std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
+    OutputBucket(controls::Pos2i pos = {0,0},std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
     void setBin(std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
 };
 
 
 class Storage {
     std::array<Bucket,24> buckets;
-    OutputBucket interface_bucket;
+    
     std::vector<std::shared_ptr<Bin>> bins;
     controls::MovementControl mov_control;
 
@@ -74,7 +75,10 @@ class Storage {
         ERROR_OUTPUT_NOT_EMPTY,
         ERROR_BIN_NOT_FOUND,
         ERROR_FULL,
+        ERROR_CAM,
+        ERROR_MIXED_ITEM
     };
+    OutputBucket interface_bucket;
     OperationStatus map();
     OperationStatus store(bool change_id=false,uint8_t item_id=0); //serialize after reading the weight
     OperationStatus retrieve(rfid_t& rfid); //serialize at the end
@@ -86,6 +90,7 @@ class Storage {
     std::weak_ptr<Bin> getBinByRfid(rfid_t& rfid);
     std::vector<Bucket*> getBucketByType(uint8_t type_id);
     bool needsReorganizing();
+    void getJson(String& json);
 
 
     void init();
