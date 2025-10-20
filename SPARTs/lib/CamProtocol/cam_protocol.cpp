@@ -114,15 +114,18 @@ CamStatus CamCommunicationMaster::send_config(const char* ssid,const char* pwd,c
 CamResult CamCommunicationMaster::process_image(TickType_t timeout)
 {
     char buffer[1];
+    printf("hi1\n");
     if(!xSemaphoreTake(CamCommunicationMaster::mutex_uart_min,timeout))
         return {.status = TIMEOUT};
     buffer[0] = 0;
+    printf("hi2\n");
     xEventGroupClearBits(CamCommunicationMaster::min_events,CamCommunicationMaster::IMAGE_PROCESSED);
     if(!transport.send_message( 0x2, (uint8_t *)buffer, 1))
     {
         xSemaphoreGive(CamCommunicationMaster::mutex_uart_min);
         return {.status = QUEUE_FULL};
     }
+    printf("hi3\n");
 
     xSemaphoreGive(CamCommunicationMaster::mutex_uart_min);
 

@@ -1,6 +1,32 @@
 #include "SPARtSCore.h"
 #include <WiFi.h>
 
+void WiFiEvent(WiFiEvent_t event) {
+  switch (event) {
+    case SYSTEM_EVENT_AP_STACONNECTED: {
+      wifi_sta_list_t stationList;
+      tcpip_adapter_get_sta_list(&stationList, nullptr);
+
+      Serial.println("New station connected!");
+      Serial.printf("Connected Stations: %d\n", stationList.num);
+      for (int i = 0; i < stationList.num; i++) {
+        wifi_sta_info_t station = stationList.sta[i];
+        Serial.printf("MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+                      station.mac[0], station.mac[1], station.mac[2],
+                      station.mac[3], station.mac[4], station.mac[5]);
+      }
+      break;
+    }
+
+    case SYSTEM_EVENT_AP_STADISCONNECTED: {
+      Serial.println("A station disconnected!");
+      break;
+    }
+
+    default:
+      break;
+  }
+}
 void SPARtSCore::run()
 {
     cam::CamResult res;
@@ -16,6 +42,7 @@ void SPARtSCore::run()
         conveyor.start();
         storage.init();
         WiFi.softAP(ssid.c_str(),password.c_str());
+        WiFi.onEvent(WiFiEvent);
         setupWebServer();
         setState(State::AWAITING_SETUP);
         
@@ -29,7 +56,7 @@ void SPARtSCore::run()
             xEventGroupClearBits(evg,0xff);
             xEventGroupWaitBits(evg,0x01,true,true,portMAX_DELAY);
         }
-        setState(next_state);
+        setState(State::INITIALIZING_CAM);
         break;
     case State::INITIALIZING_CAM:
         printf("Initializing CAM...\n");

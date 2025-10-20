@@ -206,8 +206,6 @@ static void handleRead(AsyncWebServerRequest *req, uint8_t *data, size_t len, si
 
 static void handleSetup(AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total,SPARtSCore* core)
 {
-    req->send(200);
-    return;
     if(len == 0) {
         req->send(400);
         return;
@@ -257,17 +255,17 @@ void SPARtSCore::setupWebServer() {
   server.on("/auto_store", HTTP_POST, [this](AsyncWebServerRequest *req){ handleAutoStore(req, this); });
 
 
-  server.on("/store", HTTP_POST,[](AsyncWebServerRequest *req){ req->send(200); },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
+  server.on("/store", HTTP_POST,[](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
    { handleStore(req,data,len,index,total, this); });
 
-  server.on("/retrieve", HTTP_POST,[](AsyncWebServerRequest *req){ req->send(200); },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
-   { handleRetrieve(req,data,len,index,total, this); });
+  server.on("/retrieve", HTTP_POST,[](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
+   {handleRetrieve(req,data,len,index,total, this); });
 
-  server.on("/read", HTTP_POST,[](AsyncWebServerRequest *req){ req->send(200); },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
+  server.on("/read", HTTP_POST,[](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
    { handleRead(req,data,len,index,total, this); });
 
-  server.on("/setup", HTTP_POST,[](AsyncWebServerRequest *req){ req->send(200); },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
-   { handleSetup(req,data,len,index,total, this); });
+  server.on("/setup", HTTP_POST,[](AsyncWebServerRequest *req){printf("hello\n"); },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
+   {printf("hello2\n");  handleSetup(req,data,len,index,total, this); });
 
   
   server.begin();
