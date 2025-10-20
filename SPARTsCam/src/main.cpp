@@ -31,7 +31,6 @@ cam::CamStatus setup_wifi(const char ssid[30], const char password[30],const cha
 {
   cam::CamStatus status = cam::CamStatus::PROCESS_OK;
   WiFi.begin(ssid, password);
-  Serial.print("Connecting to WiFi...");
   uint32_t timeout_ms = 5000;
   uint32_t start = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - start < timeout_ms) {
@@ -48,13 +47,21 @@ cam::CamStatus setup_wifi(const char ssid[30], const char password[30],const cha
 cam::CamResult process_image()
 {
   cam::CamResult result = {.status = cam::CamStatus::TIMEOUT,.item_code = 1,.item_quantity=10,.mixed=false};
-  digitalWrite(4,HIGH); // LED ON
-  delay(20);
+  //digitalWrite(4,HIGH); // LED ON
+  
+   
+   for(int i =0; i<5;i++){
+      camera_fb_t * fb = esp_camera_fb_get();
+      if (fb) esp_camera_fb_return(fb);
+      delay(50);
+   }
    camera_fb_t * fb = esp_camera_fb_get();
     if (!fb) {
+      digitalWrite(4,LOW);
       return result;
     }
     if (WiFi.status() != WL_CONNECTED) {
+      digitalWrite(4,LOW);
       esp_camera_fb_return(fb);
       return result;
   }
@@ -84,7 +91,7 @@ cam::CamResult process_image()
 
   if(doc.containsKey("item_name") && doc.containsKey("amount") && doc.containsKey("mixed"))
   {
-    String name = doc["item_name"];
+    String name = doc["item_name"] | "None";
     result.item_code = Item::getId(name);
     result.item_quantity = doc["amount"].as<uint16_t>();
     result.mixed = doc["mixed"].as<bool>();
@@ -122,7 +129,7 @@ void setup(){
   config.frame_size = FRAMESIZE_UXGA; // (1600x1200)
   config.jpeg_quality = 10;
   config.fb_count = 2;
-
+  esp_camera_init(&config);
   cam::CamCommunicationSlave::setup_comm();
   pinMode(4, OUTPUT);
 }
@@ -131,13 +138,13 @@ void loop(){
   switch(cam::CamCommunicationSlave::wait_for_message())
   {
     case cam::CamCommunicationSlave::IMAGE_TO_PROCESS:
-        cam::CamCommunicationSlave::send_result({.status=cam::CamStatus::PROCESS_OK},portMAX_DELAY);
+        cam::CamCommunicationSlave::send_result(process_image(),pdMS_TO_TICKS(15000));
     break;
     case cam::CamCommunicationSlave::SETUP_TO_PROCESS:
         strcpy(ssid, cam::CamCommunicationSlave::ssid);
         strcpy(pwd, cam::CamCommunicationSlave::pwd);
         strcpy(hook, cam::CamCommunicationSlave::hook);
-        cam::CamCommunicationSlave::send_status(setup_wifi(ssid,pwd,hook),portMAX_DELAY);
+        cam::CamCommunicationSlave::send_status(setup_wifi(ssid,pwd,hook),pdMS_TO_TICKS(15000));
         break;
     default:
     break;
