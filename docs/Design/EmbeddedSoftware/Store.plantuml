@@ -1,56 +1,46 @@
-@startuml Store
+@startuml
 start
-group Store {
-: Parse command;
- note 
-"/operation/store"
-end note
- if(output_bucket.empty) then 
-    : Send status message through web hook;
-    note
-    Status
-    ----
-    {
-    "state"  : "Store"
-    "status" : "ERROR_OUTPUT_EMPTY"
-    }
-    end note
-    :Await OK Command;
-    : GOTO AwaitCommand State;
-    kill
- endif
-
-if(full()) then
-    : Send status message through web hook;
-    note
-    Status
-    ----
-    {
-    "state"  : "Store"
-    "status" : "ERROR_FULL"
-    }
-    end note
-    :Await OK Command;
-    : GOTO AwaitCommand State;
-    kill
-endif
-
-: go to output_bucket;
-: read bin rfid;
-: calculate best empty bin position;
-: move to best empty bin position;
-: store bin;
-: Send status message through web hook;
-note
-    Status
-    ----
-    {
-    "state"  : "Store"
-    "status" : "OK"
-    }
-    end note
-    : Await OK Command;
-    : GOTO AwaitCommand State;
-}
+if( interface bin not empty ) then
+: Set State (Finished, ERROR_OUTPUT_NOT_EMPTY);
+:  Go to AwaitCommand state;
 end
+endif
+: Send To EspCam to Process current Picture;
+if (There is no item) then
+: Go to next bin;
+: Go to auto_store state;
+end
+else if(There are Mixed Items) then
+: Set State (Finished, ERROR_MIXED_ITEMS);
+:  Go to AwaitCommand state;
+end
+endif
+repeat : Get Bin that fits current number of items of processed type;
+if(No Bin found) then
+: map();
+: Try finding a bin again;
+if(No bin found again) then
+: Set State (Finished, ERROR_FULL);
+:  Go to AwaitCommand state;
+end
+endif
+endif
+: Read bin;
+if(RFID mismatch) then
+: map();
+: Try finding a bin again;
+if(No bin found again) then
+: Set State (Finished, ERROR_FULL);
+:  Go to AwaitCommand state;
+end
+endif
+endif
+: move bin to interface bin space;
+: read and update weight;
+repeat while (Items do not fit in bin) is (true)
+: move conveyor;
+: update bin with new items;
+: read and update weight;
+: store bin in storage;
+: Go to auto_store state;
 @enduml

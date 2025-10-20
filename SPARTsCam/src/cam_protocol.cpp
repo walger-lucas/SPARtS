@@ -144,7 +144,7 @@ char CamCommunicationSlave::ssid[30]="", CamCommunicationSlave::pwd[30]="", CamC
 
 void CamCommunicationSlave::application_handler(uint8_t min_id, uint8_t const *min_payload, size_t len_payload)
 {
-    if(min_id == 0x1 && len_payload == 120)
+    if(min_id == 0x1)
     {
         strncpy(ssid,(const char*) min_payload,30);
         strncpy(pwd,(const char*) (min_payload+30),30);
@@ -198,7 +198,12 @@ bool CamCommunicationSlave::send_status(CamStatus status, TickType_t timeout)
 }
 CamCommunicationSlave::MinEventBits CamCommunicationSlave::wait_for_message()
 {
-    return (MinEventBits) xEventGroupWaitBits(min_events,IMAGE_TO_PROCESS|SETUP_TO_PROCESS,true,false,portMAX_DELAY);
+
+    auto bit = xEventGroupWaitBits(min_events,IMAGE_TO_PROCESS|SETUP_TO_PROCESS,true,false,portMAX_DELAY);
+    if(bit & SETUP_TO_PROCESS)
+        return SETUP_TO_PROCESS;
+    else if(bit & IMAGE_TO_PROCESS)
+        return IMAGE_TO_PROCESS;
 }
 
 #endif

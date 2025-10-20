@@ -1,71 +1,52 @@
 @startuml Retrieve
 start
-group Retrieve {
- : Parse command;
- note 
-"/operation/retrive?id=xxxx"
-end note
- if(!output_bucket.empty) then 
-    : Send status message through web hook;
-    note
-    Status
-    ----
-    {
-    "state"  : "Retrieve"
-    "status" : "ERROR_OUTPUT_NOT_EMPTY"
-    }
-    end note
-    :Await OK Command;
-    : GOTO AwaitCommand State;
-    kill
- endif
+group Retrieve Bin by RFID
+    :Check if Output Bucket (interface) is empty;
+    if (Not empty?) then (yes)
+        :Set Status (FINISHED, ERROR_OUTPUT_NOT_EMPTY);
+        :Return to AwaitCommand state;
+        stop
+    endif
 
- if (!bin(id).exists || bin(id).is_missing) then
+    :Locate bucket by RFID;
+    if (Bucket not found?) then (yes)
+        :Map storage layout;
+        :Try locating bucket again;
+        if (Still not found?) then (yes)
+            :Set Status (FINISHED, ERROR_BIN_NOT_FOUND);
+            :Return to AwaitCommand state;
+            stop
+        endif
+    else (found)
+        :Read bucket contents;
+        if (Bucket empty OR RFID mismatch?) then (yes)
+            :Remap storage layout;
+            :Try locating bucket again;
+            if (Not found?) then (yes)
+                :Set Status (FINISHED, ERROR_BIN_NOT_FOUND);
+                :Return to AwaitCommand state;
+                stop
+            endif
+        endif
+    endif
+end group
 
-    : Send status message through web hook;
-    note
-    Status
-    ----
-    {
-    "state"  : "Retrieve"
-    "status" : "ERROR_BIN_NOT_FOUND"
-    }
-    end note 
-    :Await OK Command;
-    : GOTO AwaitCommand State;
-    kill
-endif
+group Transfer and Update
+    :Move bin from storage bucket to output bucket;
+    :Save current storage state (serialize);
+    if (Output bucket contains bin?) then (yes)
+        :Increment bin usage counter;
+    endif
+end group
 
-: go to bin(id);
-: read bin rfid;
-if (bin(id) != rfid) then
-    : Send status message through web hook;
-    note
-    Status
-    ----
-    {
-    "state"  : "Retrieve"
-    "status" : "ERROR_BIN_MISMATCH"
-    }
-    end note 
-    :Await OK Command;
-    : GOTO AwaitCommand State;
-    kill
-endif
-: get_bin;
-: move bin to output_bucket;
-: store bin on output_bucket;
-: Send status message through web hook;
-note
-    Status
-    ----
-    {
-    "state"  : "Retrieve"
-    "status" : "OK"
-    }
-    end note
-    : Await OK Command;
-    : GOTO AwaitCommand State;
-}
-end
+group Post-check
+    if (Reorganization needed?) then (yes)
+        :Set Status (FINISHED, OK_NEEDS_REORGANIZING);
+        :Return to AwaitCommand state;
+        stop
+    endif
+    :Set Status (FINISHED, OK);
+    :Return to AwaitCommand state;
+end group
+stop
 @enduml

@@ -26,7 +26,7 @@ void CamCommunication::setup_comm(gpio_num_t rx_pin, gpio_num_t tx_pin)
     xSemaphoreGive(mutex_uart_min);
     min_events = xEventGroupCreate();
     xEventGroupClearBits(min_events,0xFFFF);
-    xTaskCreate(uart_thread,"min_thread",configMINIMAL_STACK_SIZE*4,nullptr,configMAX_PRIORITIES-1,nullptr);
+    xTaskCreatePinnedToCore(uart_thread,"min_thread",configMINIMAL_STACK_SIZE*4,nullptr,configMAX_PRIORITIES-1,nullptr,0);
 }
 
 void CamCommunication::uart_thread(void* param)
@@ -46,7 +46,7 @@ void CamCommunication::uart_thread(void* param)
         xSemaphoreTake(mutex_uart_min,portMAX_DELAY);
         transport.poll((uint8_t *)buf, buf_len);
         xSemaphoreGive(mutex_uart_min);
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 SemaphoreHandle_t CamCommunication::mutex_uart_min {};
@@ -114,15 +114,18 @@ CamStatus CamCommunicationMaster::send_config(const char* ssid,const char* pwd,c
 CamResult CamCommunicationMaster::process_image(TickType_t timeout)
 {
     char buffer[1];
+    printf("hi1\n");
     if(!xSemaphoreTake(CamCommunicationMaster::mutex_uart_min,timeout))
         return {.status = TIMEOUT};
     buffer[0] = 0;
+    printf("hi2\n");
     xEventGroupClearBits(CamCommunicationMaster::min_events,CamCommunicationMaster::IMAGE_PROCESSED);
     if(!transport.send_message( 0x2, (uint8_t *)buffer, 1))
     {
         xSemaphoreGive(CamCommunicationMaster::mutex_uart_min);
         return {.status = QUEUE_FULL};
     }
+    printf("hi3\n");
 
     xSemaphoreGive(CamCommunicationMaster::mutex_uart_min);
 
