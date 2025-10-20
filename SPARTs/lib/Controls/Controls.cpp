@@ -157,7 +157,11 @@ namespace controls {
         unsigned long time_start = millis();
         while(end && millis()-time_start<TIMEOUT){
                 motorConveyor.run();
-                end = digitalRead(END_CONVEYOR_PIN);
+                if(digitalRead(END_CONVEYOR_PIN))
+                {
+                    delay(10);
+                    end = digitalRead(END_CONVEYOR_PIN);
+                }
         }
         motorConveyor.stop();
         motorConveyor.setCurrentPosition(0);

@@ -124,6 +124,9 @@ namespace storage
                     }
                 }
                 return false;
+            } else
+            {
+                dst->setBin();
             }
         }
         rfid_t rfid;
@@ -188,6 +191,9 @@ namespace storage
                     target->setBin(bin);
                 }
             }
+        } else 
+        {
+            target->setBin();
         }
         return target;
 
@@ -196,7 +202,7 @@ namespace storage
     Storage::OperationStatus Storage::map()
     {
         mov_control.xy_table.calibrate();
-        for(auto bucket : buckets)
+        for(auto& bucket : buckets)
             readBucket(&bucket);
         readBucket(&interface_bucket);
         return OperationStatus::OK;
@@ -231,7 +237,7 @@ namespace storage
                     bucks.push_back(&b);
             }
         }
-        if(!interface_bucket.isEmpty())
+        if(!interface_bucket.isEmpty() &&interface_bucket.getBin()->getItemId() == type)
         {
             bucks.push_back(&interface_bucket);
         }
@@ -262,15 +268,16 @@ namespace storage
         interface_bucket.setBin(bin);
         serialize();
         Bucket* buck = getEmptyBucket(bin->getUses());
-        if(buck == nullptr)
+        if(buck == nullptr || !readBucket(buck)->isEmpty())
         {
             map();
             buck = getEmptyBucket(bin->getUses());
             if(buck == nullptr)
                 return ERROR_FULL;
         }
+        
 
-        if(!move(&interface_bucket,buck))
+        if(!move(&interface_bucket,buck,true))
         {
             map();
             buck = getEmptyBucket(bin->getUses());
@@ -442,7 +449,7 @@ namespace storage
             json += "\"position\":";
             json += String(i);
             i++;
-            json += "\",";
+            json += ",";
             json += "\"rfid\":\"";
             for(auto byte : b->getRFID())
             {
@@ -450,7 +457,7 @@ namespace storage
                 sprintf(buf,"%02X",byte);
                 json += buf;
             }
-            json += ",";
+            json += "\",";
             json += "\"item_name\":\"";
             json += item_name;
             json += "\",";
@@ -472,16 +479,15 @@ namespace storage
                 String item_name = Item::getName(b->getItemId());
                 json += "{";
                 json += "\"position\":";
-                json += String(i);
-                i++;
-                json += "\"rfid\":\"";
+                json += String(255);
+                json += ",\"rfid\":\"";
                 for(auto byte : b->getRFID())
                 {
                     char buf[3];
                     sprintf(buf,"%02X",byte);
                     json += buf;
                 }
-                json += ",";
+                json += "\",";
                 json += "\"item_name\":\"";
                 json += item_name;
                 json += "\",";

@@ -60,13 +60,13 @@ class Storage {
     std::array<Bucket,24> buckets;
     
     std::vector<std::shared_ptr<Bin>> bins;
-    controls::MovementControl mov_control;
+    
 
     bool move(Bucket* src, Bucket* dst,bool force = false);
     void desserialize();
     void serialize();
     public:
-
+    controls::MovementControl mov_control;
     enum OperationStatus
     {
         OK,

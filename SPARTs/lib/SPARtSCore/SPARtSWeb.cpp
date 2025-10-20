@@ -188,8 +188,8 @@ static void handleRead(AsyncWebServerRequest *req, uint8_t *data, size_t len, si
         req->send(400);
         return;
     }
-
     // Process normal JSON with item_name
+    
     uint8_t id = doc["id"] | 55; // default to empty
     if(id == 55) {
         req->send(400);
@@ -239,6 +239,34 @@ static void handleSetup(AsyncWebServerRequest *req, uint8_t *data, size_t len, s
     }
 }
 
+static void handleDebugMove(AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total,SPARtSCore* core)
+{
+    if(len == 0) {
+        req->send(400);
+        return;
+    }
+
+    JsonDocument doc;
+    DeserializationError err = deserializeJson(doc, data, len);
+    if(err) {
+        req->send(400);
+        return;
+    }
+
+    // Check if JSON object is empty
+    if(doc.is<JsonObject>() && doc.size() == 0) {
+        req->send(400);
+        return;
+    }
+
+    // Process normal JSON with item_name
+    int x = doc["x"] | 0;
+    int y = doc["y"] | 0;
+
+    core->storage.mov_control.xy_table.moveTo({x,y});
+    req->send(200);
+}
+
 
 
 
@@ -264,10 +292,24 @@ void SPARtSCore::setupWebServer() {
   server.on("/read", HTTP_POST,[](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
    { handleRead(req,data,len,index,total, this); });
 
-  server.on("/setup", HTTP_POST,[](AsyncWebServerRequest *req){printf("hello\n"); },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
-   {printf("hello2\n");  handleSetup(req,data,len,index,total, this); });
+  server.on("/setup", HTTP_POST,[](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
+   { handleSetup(req,data,len,index,total, this); });
 
-  
+  server.on("/debug/move", HTTP_POST,[](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
+   {printf("[DEBUG] MOVE\n"); handleDebugMove(req,data,len,index,total, this); });
+  server.on("/debug/calibrate/xy", HTTP_POST, [this](AsyncWebServerRequest *req)
+  {printf("[DEBUG] CALIBRATE XY\n"); storage.mov_control.xy_table.calibrate();req->send(200); });
+  server.on("/debug/calibrate/conveyor", HTTP_POST, [this](AsyncWebServerRequest *req)
+  {printf("[DEBUG] CALIBRATE CONVEYOR\n"); conveyor.start();req->send(200); });
+  server.on("/debug/calibrate/platform", HTTP_POST, [this](AsyncWebServerRequest *req)
+  {printf("[DEBUG] CALIBRATE PLATFORM\n"); storage.mov_control.platform.calibrate();req->send(200); });
+  server.on("/debug/platform/extend", HTTP_POST, [this](AsyncWebServerRequest *req)
+  {printf("[DEBUG] EXTEND\n"); storage.mov_control.platform.move(controls::PlatformControl::Direction::EXTEND,controls::Speed::FAST);req->send(200); });
+  server.on("/debug/platform/retract", HTTP_POST, [this](AsyncWebServerRequest *req)
+  {printf("[DEBUG] RETRACT\n"); storage.mov_control.platform.move(controls::PlatformControl::Direction::RETRACT,controls::Speed::FAST);req->send(200); });
+    server.on("/debug/conveyor/next", HTTP_POST, [this](AsyncWebServerRequest *req)
+  {printf("[DEBUG] CONVEYOR NEXT\n"); conveyor.next();req->send(200); });
+
   server.begin();
   Serial.println("Web server started...\n");
 }

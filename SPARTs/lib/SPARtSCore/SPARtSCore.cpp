@@ -41,6 +41,7 @@ void SPARtSCore::run()
         cam::CamCommunicationMaster::setup_comm();
         conveyor.start();
         storage.init();
+
         WiFi.softAP(ssid.c_str(),password.c_str());
         WiFi.onEvent(WiFiEvent);
         setupWebServer();
@@ -101,6 +102,7 @@ void SPARtSCore::run()
             last_storage_status = storage::Storage::OK_NEEDS_REORGANIZING;
         else
             last_storage_status = storage::Storage::OK;
+        setState(State::IDLE);
         break;
     case State::REMAP:
         printf("Remapping...\n");

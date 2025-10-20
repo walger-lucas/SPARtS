@@ -24,8 +24,7 @@ public:
 private:
     State current_state = State::INITIALIZING;
     EventGroupHandle_t evg;
-    storage::Storage storage;
-    controls::ConveyorControl conveyor;
+
     State next_state = State::IDLE;
     String uri;
     controls::rfid_t rfid;
@@ -36,6 +35,8 @@ private:
     storage::Storage::OperationStatus last_storage_status = storage::Storage::OperationStatus::OK;
     AsyncWebServer server {80};
 public:
+    storage::Storage storage;
+    controls::ConveyorControl conveyor;
     inline State getState() { return current_state; }
     void setState(State newState){  current_state = newState; }
     void run();
@@ -62,11 +63,15 @@ public:
     {
         String json;
         json = "{ \"state\":";
-        if(getState()  == State::IDLE || getState()  == State::AWAITING_SETUP)
+        if(getState()  == State::IDLE )
         {
             
             json += "\"FINISHED\",";
-        } else {
+        } else if(getState()  == State::AWAITING_SETUP)
+        {
+            json += "\"SETUP\",";
+        }
+        else {
             json += "\"RUNNING\",";
         }
         json += "\"status\":";
