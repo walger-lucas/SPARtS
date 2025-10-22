@@ -1,4 +1,5 @@
 #include "SPARtSCore.h"
+#include "esp_task_wdt.h"
 #if 1
 // Definição dos pinos (motor esquerdo)
 #define STEP_LEFT 25
@@ -29,7 +30,7 @@
 SPARtSCore core;
 void setup() {
   Serial.begin(115200);
-  
+  esp_task_wdt_deinit();
   
   
 

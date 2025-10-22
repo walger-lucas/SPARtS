@@ -20,6 +20,7 @@ public:
         READ_BUCKET,
         REMAP,
         REORGANIZE,
+        PROCESS_IMAGE,
     };
 private:
     State current_state = State::INITIALIZING;
@@ -105,28 +106,23 @@ public:
                 break;
         }
         json += ",";
-        json += "\"last_object\":\"";
+        json += "\"item_name\":\"";
         json += Item::getName(last_object_sawn);
         json += "\"";
         json += " }";
         return json;
         
     }
-    bool process_image(uint8_t& item_code)
+    bool process_image()
     {
         if(getState() == State::IDLE)
         {
-            auto res = cam::CamCommunicationMaster::process_image(pdMS_TO_TICKS(30000));
-            if(!res.ok())
-            {
-                next_state = State::INITIALIZING_CAM;
-                last_storage_status = storage::Storage::OperationStatus::ERROR_CAM;
-                xEventGroupSetBits(evg, 0x01);
-                return false;
-            }
-            last_object_sawn = res.item_code;
-            item_code = res.item_code;
+
+            this->rfid = rfid;
+            next_state = State::PROCESS_IMAGE;
+            xEventGroupSetBits(evg, 0x01);
             return true;
+        
         }
         return false;
     }

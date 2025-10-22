@@ -152,14 +152,14 @@ namespace controls {
     {
         motorConveyor.setMaxSpeed(MAX_SPEED/2);
         motorConveyor.setAcceleration(ACCELERATION/2);
-        motorConveyor.move(-20000);
+        motorConveyor.move(-200000);
         int end = digitalRead(END_CONVEYOR_PIN);
         unsigned long time_start = millis();
         while(end && millis()-time_start<TIMEOUT){
                 motorConveyor.run();
-                if(digitalRead(END_CONVEYOR_PIN))
+                if(!digitalRead(END_CONVEYOR_PIN))
                 {
-                    delay(10);
+                    delay(1);
                     end = digitalRead(END_CONVEYOR_PIN);
                 }
         }

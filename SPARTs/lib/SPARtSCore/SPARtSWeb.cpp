@@ -17,14 +17,9 @@ static void handleStatus(AsyncWebServerRequest *req, SPARtSCore* core)
 
 static void handleCaptureImage(AsyncWebServerRequest *req, SPARtSCore* core)
 {
-    uint8_t obj;
-
-    if(core->process_image(obj))
+    if(core->process_image())
     {
-        String json = "{\"item_name\":\"";
-        json += Item::getName(obj);
-        json+= "\"}";
-        req->send(200, "application/json", json);
+        req->send(200);
     } else
     {
         req->send(503);

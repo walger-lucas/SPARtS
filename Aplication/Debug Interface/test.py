@@ -98,6 +98,7 @@ class ApiSparts:
             print(data)
             finished = resp.status_code == 200 and data["state"] == "FINISHED"
         self.status = SpartsOpCode[data["status"]]
+        self.image_item_name = data["item_name"]
 
     def setup(self):
         resp =requests.post(self.url+"/setup",json={"image_processing_uri":self.image_url})
@@ -127,8 +128,7 @@ class ApiSparts:
         resp =requests.post(self.url+"/capture_image")
         if resp.status_code!=200 :
             return False
-        data = resp.json()
-        self.image_item_name = data["item_name"]
+        self.await_finish()
         return True
     def get_bins(self):
         resp =requests.get(self.url+"/bins")
@@ -318,7 +318,7 @@ class SpartsGUI:
     def call_image(self):
         if not self.api: return
         self.log("Capturing image...")
-        self.log("Image success." if self.api.image() else "Image failed.")
+        self.log(f"Image success. {self.api.image_item_name}" if self.api.image() else "Image failed.")
         self.log("Status: "+self.api.status.name)
 
     def call_store(self):

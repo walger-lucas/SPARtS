@@ -212,7 +212,18 @@ void SPARtSCore::run()
                 last_storage_status = storage::Storage::OK;
             break;
             
-                
+    case State::PROCESS_IMAGE:
+            res = cam::CamCommunicationMaster::process_image(pdMS_TO_TICKS(20000));
+            if(!res.ok())
+            {
+                setState(State::INITIALIZING_CAM);
+                last_storage_status = storage::Storage::OperationStatus::ERROR_CAM;
+                return;
+            }
+            last_object_sawn = res.item_code;
+            setState(State::IDLE);
+            break;
+            
     default:
         current_state = State::IDLE;
         break;
