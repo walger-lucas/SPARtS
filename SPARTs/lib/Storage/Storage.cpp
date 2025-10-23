@@ -78,6 +78,22 @@ namespace storage
     OutputBucket::OutputBucket(controls::Pos2i pos,std::weak_ptr<Bin> bin)
     :Bucket(pos,bin)
     {
+        hx711.begin(DT_PIN,SCK_PIN);
+        hx711.set_scale(SCALE);
+        delay(1000);
+        hx711.tare();
+    }
+
+    float OutputBucket::updateWeight(uint8_t type)
+    {
+        if(isEmpty())
+            return 0;
+        
+        delay(1000);
+        float weight = hx711.get_units(10);
+        getBin()->setAmount((weight+0.5)/Item::getWeight(type));
+        printf("WEIGHT UPDATED TO: %f g\n",weight);
+        return weight;
 
     }
 
@@ -89,8 +105,7 @@ namespace storage
         {
             auto b = getBin();
             uint8_t item = b->getItemId();
-            //TODO WEIGHT UPDATE
-            getBin()->setAmount(10);
+            float weight = updateWeight(item);
         }
     }
 
@@ -205,6 +220,7 @@ namespace storage
         for(auto& bucket : buckets)
             readBucket(&bucket);
         readBucket(&interface_bucket);
+        mov_control.xy_table.calibrate();
         return OperationStatus::OK;
     }
 
@@ -355,18 +371,20 @@ namespace storage
         SPIFFS.begin(true,"/spiffs");
         //start spiffs
         int offset_x=0, offset_y=0;
-        int x_positions[] = {20,332,635,938,1243};
-        int y_positions[] = {20,400,700,1000,1300,1600};
+        int x_positions[] = {60,360,660,960,1260};
+        int y_positions[] = {40,380,720,1060,1400,1740};
 
-        buckets[0] = Bucket({x_positions[2],y_positions[5]});
-        buckets[1] = Bucket({x_positions[3],y_positions[5]});
-        buckets[2] = Bucket({x_positions[4],y_positions[5]});
-        buckets[3] = Bucket({x_positions[4],y_positions[4]});
-        buckets[4] = Bucket({x_positions[3],y_positions[4]});
-        buckets[5] = Bucket({x_positions[2],y_positions[4]});
-        buckets[6] = Bucket({x_positions[2],y_positions[3]});
-        buckets[7] = Bucket({x_positions[3],y_positions[3]});
-        buckets[8] = Bucket({x_positions[4],y_positions[3]});
+        buckets[0] = Bucket({630,y_positions[5]});
+        buckets[1] = Bucket({935,y_positions[5]});
+        buckets[2] = Bucket({1240,y_positions[5]});
+        buckets[3] = Bucket({1240,y_positions[4]});
+        buckets[4] = Bucket({950,y_positions[4]});
+        buckets[5] = Bucket({650,y_positions[4]});
+        buckets[6] = Bucket({646,y_positions[3]});
+        buckets[7] = Bucket({946,y_positions[3]});
+        buckets[8] = Bucket({1250,y_positions[3]});
+
+
         buckets[9] = Bucket({x_positions[4],y_positions[2]});
         buckets[10] = Bucket({x_positions[3],y_positions[2]});
         buckets[11] = Bucket({x_positions[2],y_positions[2]});
@@ -382,7 +400,7 @@ namespace storage
         buckets[21] = Bucket({x_positions[2],y_positions[0]});
         buckets[22] = Bucket({x_positions[1],y_positions[0]});
         buckets[23] = Bucket({x_positions[0],y_positions[0]});
-        interface_bucket = OutputBucket({20,1400});
+        interface_bucket = OutputBucket({30,1400});
 
         desserialize();
         mov_control.init();
@@ -502,4 +520,26 @@ namespace storage
         json += "] }";
 
     }
+
+    Bucket* Storage::FindFittingBucket(int amount, uint8_t type)
+    {
+        auto bucks = getBucketByType(type);
+        if(!bucks.empty())
+        {
+            for(auto* b : bucks)
+            {
+                if(b!=&interface_bucket && b->getBin()->getAmount()+amount <= Item::getMaxAmount(type))
+                {
+                    return b;
+                }
+            }
+        }
+
+        auto other_bucks = getBucketByType(0);
+        if(other_bucks.empty())
+            return nullptr;
+        return other_bucks[0];
+    }
 }
+
+

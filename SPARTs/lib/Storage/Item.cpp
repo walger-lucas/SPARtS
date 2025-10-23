@@ -31,3 +31,7 @@ const std::unordered_map<uint8_t,std::string> Item::backward ={
         {11,"porc-m6-martelo-canal8"},
         {12,"porc-m6-sextavada"}
     };
+
+const std::array<int,13> Item::max_item {0,25,25,25,25,25,25,25,25,25,25,25,25};
+
+const std::array<float,13> Item::weight_per_item {0.1,3.0,5.0,5.0,3.0,2.0,15.0,10.0,9.0,1.0,5.0,3.0,100.0};

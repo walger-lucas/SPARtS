@@ -31,6 +31,7 @@ SPARtSCore core;
 void setup() {
   Serial.begin(115200);
   esp_task_wdt_deinit();
+  pinMode(36,INPUT);
   
   
 
@@ -39,9 +40,10 @@ void setup() {
 void loop() {
   //conveyor
   core.run();
+  //printf("%d\n",digitalRead(36));
 
   
-  // stepMotor.goToBin(3,3);
+  //stepMotor.goToBin(3,3);
   
 }
 #else

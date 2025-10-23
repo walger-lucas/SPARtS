@@ -35,6 +35,8 @@ private:
     uint8_t last_object_sawn = 0;
     storage::Storage::OperationStatus last_storage_status = storage::Storage::OperationStatus::OK;
     AsyncWebServer server {80};
+
+    storage::Storage::OperationStatus auto_store_state();
 public:
     storage::Storage storage;
     controls::ConveyorControl conveyor;

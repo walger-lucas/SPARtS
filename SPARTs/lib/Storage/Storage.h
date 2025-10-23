@@ -4,7 +4,7 @@
 #include <array>
 #include <vector>
 #include <Item.h>
-
+#include <HX711.h>
 namespace storage
 {
     
@@ -43,6 +43,7 @@ class Bucket
 
     virtual void setBin(std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
     virtual bool isEmpty();
+    
 
     std::shared_ptr<Bin> getBin();
     controls::Pos2i getPos();
@@ -50,9 +51,14 @@ class Bucket
 };
 
 class OutputBucket: public Bucket {
+    HX711 hx711;
+    constexpr static int DT_PIN = 19, SCK_PIN=18;
+    constexpr static float SCALE = 1400;
+    
     public:
     OutputBucket(controls::Pos2i pos = {0,0},std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
     void setBin(std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
+    float updateWeight(uint8_t type);
 };
 
 
@@ -87,6 +93,7 @@ class Storage {
     Bucket* readBucket(Bucket* bucket);
     Bucket* getBucketByRfid(rfid_t& rfid);
     Bucket* getEmptyBucket(int uses);
+    Bucket* FindFittingBucket(int amount, uint8_t type);
     std::weak_ptr<Bin> getBinByRfid(rfid_t& rfid);
     std::vector<Bucket*> getBucketByType(uint8_t type_id);
     bool needsReorganizing();

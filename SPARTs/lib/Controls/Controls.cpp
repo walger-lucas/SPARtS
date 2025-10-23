@@ -16,8 +16,8 @@ namespace controls {
     {
         switch (speed)
         {
-        case Speed::SLOW: return ACCELERATION/4;
-        case Speed::MEDIUM: return ACCELERATION/2;
+        case Speed::SLOW: return ACCELERATION/2;
+        case Speed::MEDIUM: return ACCELERATION;
         case Speed::FAST: return ACCELERATION;
         default:    return ACCELERATION/2;
         }
@@ -139,7 +139,6 @@ namespace controls {
             delay(200);
             if(start())
             {
-                cur_pos = 0;
                 return true;
             }
             return false;
@@ -155,7 +154,7 @@ namespace controls {
         motorConveyor.move(-200000);
         int end = digitalRead(END_CONVEYOR_PIN);
         unsigned long time_start = millis();
-        while(end && millis()-time_start<TIMEOUT){
+        while(end && millis()-time_start<TIMEOUT+2000){
                 motorConveyor.run();
                 if(!digitalRead(END_CONVEYOR_PIN))
                 {
@@ -167,10 +166,11 @@ namespace controls {
         motorConveyor.setCurrentPosition(0);
         motorConveyor.setMaxSpeed(MAX_SPEED);
         motorConveyor.setAcceleration(ACCELERATION);
-        if(millis()-time_start>=TIMEOUT)
+        if(millis()-time_start>=TIMEOUT+2000)
             return false;
         motorConveyor.move(BEGIN_STEP_OFFSET);
         motorConveyor.runToPosition();
+        cur_pos = 0;
         return true;
     }
     int ConveyorControl::getPos()
@@ -184,8 +184,8 @@ namespace controls {
         int signal = (dir == Direction::EXTEND)? 1 : -1;
         switch (speed)
         {
-        case Speed::SLOW: return (90 + signal*MAX_SPEED*3.5/4);
-        case Speed::MEDIUM: return (90 + signal*MAX_SPEED*3.5/4);
+        case Speed::SLOW: return (90 + signal*MAX_SPEED);
+        case Speed::MEDIUM: return (90 + signal*MAX_SPEED);
         case Speed::FAST: return (90 + signal*MAX_SPEED);
         default:    return (90 + signal*MAX_SPEED);
         }
@@ -228,15 +228,20 @@ namespace controls {
         if(pos==dir)
            return true;
         delay(500);
-        unsigned long start = millis();
+        
         servo.write(getSpeed(dir,speed));
+        unsigned long start = millis();
+        start = millis();
         if(onEnd())
         {
-            delay(700);   
-            //while(onEnd() && millis()-start < 1500){};
+            while(onEnd() && millis()-start < 1500){delay(10);};
+            delay(100);
         }
         //servo.write(getSpeed(dir,Speed::FAST));
-        while(!onEnd() && millis()-start< TIMEOUT){};
+        bool end = onEnd();
+        while(!onEnd() && millis()-start< TIMEOUT){
+            delay(10);
+        };
         servo.write(90);
         
         if(millis()-start >= TIMEOUT)

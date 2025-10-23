@@ -38,7 +38,7 @@ inline Pos2i operator+(const Pos2i pos1,const Pos2i pos2)
 
 class XYControl {
 
-    static constexpr int ACCELERATION{200},MAX_SPEED{700}, TIMEOUT {10000};
+    static constexpr int ACCELERATION{200},MAX_SPEED{400}, TIMEOUT {10000};
     static constexpr int STEP_PIN_X {27}, DIR_PIN_X {26}, END_X_PIN{34};
     static constexpr int STEP_PIN_Y {25}, DIR_PIN_Y {33}, END_Y_PIN{35};
     static constexpr int MAX_Y {5000}, MAX_X {5000};
@@ -97,7 +97,7 @@ class PlatformControl
 using rfid_t = std::array<uint8_t,12> ;
 class MovementControl {
     private:
-    static constexpr int STEPS_TO_UP_BIN {100};
+    static constexpr int STEPS_TO_UP_BIN {50};
     MFRC522DriverPinSimple pin{15};
     SPIClass &spiClass = SPI;
     const SPISettings spiSettings = SPISettings(SPI_CLOCK_DIV4, MSBFIRST, SPI_MODE0); // May have to be set if hardware is not fully compatible to Arduino specifications.
