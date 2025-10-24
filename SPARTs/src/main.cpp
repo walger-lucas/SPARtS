@@ -25,13 +25,21 @@
 //QUINTA (DIAGRAMAS)
 
 // - (604,0) (907,0) (1208,0))
-
+#include
 */
+#include "HX711.h"
 SPARtSCore core;
+HX711 hx711;
 void setup() {
   Serial.begin(115200);
   esp_task_wdt_deinit();
-  pinMode(36,INPUT);
+ /* hx711.begin(19,18);
+  
+  hx711.set_scale(1652);
+  
+  delay(1000);
+  hx711.wait_ready(10);
+  hx711.tare();*/
   
   
 
@@ -40,6 +48,9 @@ void setup() {
 void loop() {
   //conveyor
   core.run();
+  //hx711.wait_ready(100);
+  //printf("(%ld),(%ld), %f\n",hx711.read_average(10),hx711.get_value(10),hx711.get_units(10));
+ // delay(1000);
   //printf("%d\n",digitalRead(36));
 
   

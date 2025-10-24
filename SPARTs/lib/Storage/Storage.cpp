@@ -80,7 +80,7 @@ namespace storage
     {
         hx711.begin(DT_PIN,SCK_PIN);
         hx711.set_scale(SCALE);
-        delay(1000);
+        hx711.wait_ready(1000);
         hx711.tare();
     }
 
@@ -89,8 +89,8 @@ namespace storage
         if(isEmpty())
             return 0;
         
-        delay(1000);
-        float weight = hx711.get_units(10);
+        hx711.wait_ready(1000);
+        float weight = hx711.get_units(20);
         getBin()->setAmount((weight+0.5)/Item::getWeight(type));
         printf("WEIGHT UPDATED TO: %f g\n",weight);
         return weight;
@@ -453,9 +453,10 @@ namespace storage
     {
         json = "{ \"bins\": [";
         bool first = true;
-        int i = 0;
-        for(auto& buck : buckets)
+        
+        for(int i =0; i<buckets.size();i++)
         {
+            auto& buck = buckets[i];
             if(buck.isEmpty())
                 continue;
             if(!first)
@@ -466,7 +467,6 @@ namespace storage
             json += "{";
             json += "\"position\":";
             json += String(i);
-            i++;
             json += ",";
             json += "\"rfid\":\"";
             for(auto byte : b->getRFID())

@@ -274,14 +274,19 @@ namespace controls {
         platform.move(PlatformControl::Direction::EXTEND,Speed::FAST);
         xy_table.moveTo(initial+Pos2i{0,STEPS_TO_UP_BIN},Speed::SLOW);
         delay(50);
-        if(mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
+        for(int i = 0; i<5;i++)
         {
-            rfid_read = true;
-            rfid.fill(0);
-            for(int i =0;i<mfrc522.uid.size;i++)
-                rfid[i] = mfrc522.uid.uidByte[i];
-            mfrc522.PICC_HaltA();
-            mfrc522.PCD_StopCrypto1();
+            delay(20);
+            if(mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
+            {
+                rfid_read = true;
+                rfid.fill(0);
+                for(int i =0;i<mfrc522.uid.size;i++)
+                    rfid[i] = mfrc522.uid.uidByte[i];
+                mfrc522.PICC_HaltA();
+                mfrc522.PCD_StopCrypto1();
+                break;
+            }
         }
         xy_table.moveTo(initial);
         platform.move(PlatformControl::Direction::RETRACT,Speed::FAST);
@@ -296,14 +301,18 @@ namespace controls {
         platform.move(PlatformControl::Direction::EXTEND,Speed::FAST);
         xy_table.moveTo(initial+Pos2i{0,STEPS_TO_UP_BIN},Speed::SLOW);
         delay(50);
-        if(mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
+        for(int i = 0; i<5;i++)
         {
-            rfid_read = true;
-            rfid.fill(0);
-            for(int i =0;i<mfrc522.uid.size;i++)
-                rfid[i] = mfrc522.uid.uidByte[i];
-            mfrc522.PICC_HaltA();
-            mfrc522.PCD_StopCrypto1();
+            delay(20);
+            if(mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
+            {
+                rfid_read = true;
+                rfid.fill(0);
+                for(int i =0;i<mfrc522.uid.size;i++)
+                    rfid[i] = mfrc522.uid.uidByte[i];
+                mfrc522.PICC_HaltA();
+                mfrc522.PCD_StopCrypto1();
+            }
         }
         platform.move(PlatformControl::Direction::RETRACT,Speed::SLOW);
         xy_table.moveTo(initial);

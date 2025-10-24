@@ -49,7 +49,7 @@ class MLModel():
 
     def unload_model(self):
         """ Unloads the model and stops memory usage """
-        if hasattr(self, 'model'):
+        if hasattr(self, 'loaded_model'):
             self.loaded_model.to("meta")
             del self.loaded_model
             self.loaded_model = None
@@ -99,10 +99,9 @@ class MLModel():
             raise ValueError("Input image must be a valid OpenCV image (numpy array).")
         
         # Verify if the model is loaded
-        if not hasattr(self, 'model'):
+        if not hasattr(self, 'loaded_model'):
             self.load_model(
                 weights=self.weights,
-                task=self.task
             )
             raise RuntimeWarning("The model is not loaded. Loading now, in runtime.")
 
@@ -131,11 +130,14 @@ class MLModel():
         unique_classes = np.unique(detections.class_id)
         if len(unique_classes) > 1:
             response["mixed"] = True
-        else:
+        elif len(unique_classes) > 0:
             response["item_name"] = self.CLASS_NAMES_DICT[unique_classes[0]]
             response["amount"] = len(detections.class_id)
 
         return response, annotated_img
+    
+ml_model = MLModel(weights='/home/nyx/dev/of3/SPARtS/Aplication/Debug Interface/mediumv3.pt', conf=0.79)
+
 
 def get_local_ip():
     """Get the local IP address of the machine."""
@@ -170,13 +172,13 @@ class ImageHandler(BaseHTTPRequestHandler):
         filename = next_filename()
         with open(filename, "wb") as f:
             f.write(image_data)
-
-        ml_model = MLModel(weights='/home/gustavo/Downloads/nanoV2.pt', conf=0.79)
+                    
+        response, annotated_image = ml_model.predict(filename, draw=True)
         
-        response = ml_model.predict(filename, draw=True)[0]
-        
-        with open(filename +"_detections", "wb") as f:
-            f.write(cv2.imencode('.jpg', ml_model.predict(filename, draw=True)[1])[1].tobytes())
+        annotated_filename = "det" + filename
+        print(annotated_filename)
+        print(response)
+        cv2.imwrite(annotated_filename, annotated_image)
 
         resp_bytes = json.dumps(response).encode('utf-8')
         
