@@ -128,9 +128,14 @@ CamResult CamCommunicationMaster::process_image(TickType_t timeout)
     printf("hi3\n");
 
     xSemaphoreGive(CamCommunicationMaster::mutex_uart_min);
+    unsigned long start = millis();
+    auto events = xEventGroupGetBits(min_events);
+    while (!(events & CamCommunicationMaster::IMAGE_PROCESSED) && millis()-start < timeout) {
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+        events = xEventGroupGetBits(min_events);
+    } // feed the watchdog
 
-    auto events = xEventGroupWaitBits(min_events,CamCommunicationMaster::IMAGE_PROCESSED,pdTRUE,pdTRUE,timeout);
-
+    printf("hi4\n");
     if(events & CamCommunicationMaster::IMAGE_PROCESSED)
     {
 

@@ -117,104 +117,117 @@ void SPARtSCore::run()
 
     case State::AUTO_STORE:
         printf("Auto storing item...\n");
-        {
-            controls::rfid_t rfid;
-            if(!storage.readBucket(&storage.interface_bucket)->isEmpty())
-            {
-                last_storage_status = storage::Storage::OperationStatus::ERROR_OUTPUT_NOT_EMPTY;
-                current_state = State::IDLE;
-                if(storage.needsReorganizing())
-                    last_storage_status = storage::Storage::OK_NEEDS_REORGANIZING;
-                else
-                    last_storage_status = storage::Storage::OK;
-                return;
-            }
-
-            res = cam::CamCommunicationMaster::process_image(pdMS_TO_TICKS(15000));
-
+        auto_store_state();
+        break;
+            
+    case State::PROCESS_IMAGE:
+            res = cam::CamCommunicationMaster::process_image(pdMS_TO_TICKS(20000));
+            last_storage_status = storage::Storage::OperationStatus::OK;
             if(!res.ok())
             {
-                current_state = State::INITIALIZING_CAM;
+                setState(State::INITIALIZING_CAM);
                 last_storage_status = storage::Storage::OperationStatus::ERROR_CAM;
                 return;
             }
-            if(res.item_code == 0)
-            {
-                if(conveyor.getPos()==controls::ConveyorControl::MAX_BIN-1)
-                {
-                    current_state = State::IDLE;
-                }
-                conveyor.next();
-                last_storage_status = storage::Storage::OperationStatus::OK;
-                current_state = State::AUTO_STORE;
-                return;
-            }
+            last_object_sawn = res.item_code;
+            setState(State::IDLE);
+            break;
+            
+    default:
+        current_state = State::IDLE;
+        break;
+    }
+}
 
-            if(res.mixed)
+
+storage::Storage::OperationStatus SPARtSCore::auto_store_state()
+{
+
+    auto res = cam::CamCommunicationMaster::process_image(pdMS_TO_TICKS(15000));
+
+    if(!res.ok())
+    {
+        current_state = State::INITIALIZING_CAM;
+        last_storage_status = storage::Storage::OperationStatus::ERROR_CAM;
+        return storage::Storage::OperationStatus::ERROR_CAM;
+    }
+    if(res.item_code == 0)
+    {
+        if(conveyor.getPos()==controls::ConveyorControl::MAX_BIN-1)
+        {
+            current_state = State::IDLE;
+        }
+        conveyor.next();
+        last_storage_status = storage::Storage::OperationStatus::OK;
+        current_state = State::AUTO_STORE;
+        return storage::Storage::OperationStatus::OK;;
+    }
+
+    if(res.mixed)
+    {
+        last_storage_status = storage::Storage::OperationStatus::ERROR_MIXED_ITEM;
+        current_state = State::IDLE;
+        return storage::Storage::OperationStatus::ERROR_MIXED_ITEM;
+    }
+    bool fits = false;
+    while(!fits)
+    {
+        storage::Bucket* found_bin = storage.FindFittingBucket(res.item_quantity,res.item_code);
+        if(!found_bin)
+        {
+            storage.map();
+            found_bin = storage.FindFittingBucket(res.item_quantity,res.item_code);
+            if(!found_bin)
             {
-                last_storage_status = storage::Storage::OperationStatus::ERROR_MIXED_ITEM;
                 current_state = State::IDLE;
-                return;
+                last_storage_status = storage::Storage::ERROR_FULL;
+                return storage::Storage::ERROR_FULL;
             }
-            fits = false;
-            while(!fits)
-            {
-                controls::rfid_t rfid;
-                //TODO FIND BIN of type x
-                bool found_bin;
-                if(!found_bin)
-                {
-                    //TRY findind bin again (type + quantity now)
-                    if(!found_bin)
-                    {
-                        current_state = State::IDLE;
-                        last_storage_status = storage::Storage::ERROR_FULL;
-                    }
-                }
-                opstat = storage.retrieve(rfid);
-                using OperationStatus = storage::Storage::OperationStatus;
-                if(opstat != OperationStatus::OK && opstat != OperationStatus::OK_NEEDS_REORGANIZING)
-                {
-                        current_state = State::IDLE;
-                        last_storage_status = storage::Storage::ERROR_FULL; 
-                        return;
-                }
-                //AWAIT
-                //SEE IF FITS
-                if(!fits)
-                {
-                    opstat = storage.store();
-                    if(opstat != OperationStatus::OK && opstat != OperationStatus::OK_NEEDS_REORGANIZING)
-                    {
-                        current_state = State::IDLE;
-                        last_storage_status = storage::Storage::ERROR_FULL; 
-                        return;
-                    }
-                }
-
-                
-                //TODO REST OF THIS
-            }
-            conveyor.next();
-            using OperationStatus = storage::Storage::OperationStatus;
+        }
+        controls::rfid_t rfid = found_bin->getBin()->getRFID();
+        auto opstat = storage.retrieve(rfid);
+        using OperationStatus = storage::Storage::OperationStatus;
+        if(opstat != OperationStatus::OK && opstat != OperationStatus::OK_NEEDS_REORGANIZING)
+        {
+                current_state = State::IDLE;
+                last_storage_status = opstat; 
+                return opstat;
+        }
+        storage.interface_bucket.updateWeight(res.item_code);
+        fits = storage.interface_bucket.getBin()->getAmount()+res.item_quantity <= Item::getMaxAmount(res.item_code);
+        if(!fits)
+        {
+            
             opstat = storage.store();
             if(opstat != OperationStatus::OK && opstat != OperationStatus::OK_NEEDS_REORGANIZING)
             {
                 current_state = State::IDLE;
-                last_storage_status = storage::Storage::ERROR_FULL; 
-                return;
+                last_storage_status = opstat; 
+                return opstat;
             }
-            if(conveyor.getPos()==controls::ConveyorControl::MAX_BIN-1)
-                current_state = State::IDLE;
-            if(storage.needsReorganizing())
-                last_storage_status = storage::Storage::OK_NEEDS_REORGANIZING;
-            else
-                last_storage_status = storage::Storage::OK;
-            break;
-            
-                
-    default:
+        }
+        storage.interface_bucket.getBin()->setItemId(res.item_code);
+    }
+    conveyor.next();
+    using OperationStatus = storage::Storage::OperationStatus;
+    auto opstat = storage.store();
+    if(opstat != OperationStatus::OK && opstat != OperationStatus::OK_NEEDS_REORGANIZING)
+    {
         current_state = State::IDLE;
-        break;
-    }}
+        last_storage_status = opstat; 
+        return opstat;
+    }
+    if(conveyor.getPos()==controls::ConveyorControl::MAX_BIN-1)
+        current_state = State::IDLE;
+    if(storage.needsReorganizing())
+    {
+        last_storage_status = storage::Storage::OK_NEEDS_REORGANIZING;
+        return OperationStatus::OK_NEEDS_REORGANIZING;
+    }
+    else
+    {
+        last_storage_status = storage::Storage::OK;
+        return OperationStatus::OK;
+    }
+
 }
