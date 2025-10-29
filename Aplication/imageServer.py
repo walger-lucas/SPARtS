@@ -2,9 +2,11 @@ import numpy as np
 from ultralytics import YOLO
 import supervision as sv
 import torch
+import cv2
 import gc
 from enum import Enum
-from http.server import ThreadingHTTPServer, HTTPServer
+from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler
+import os, json
 PORT = 9000
 IMAGE_DIR = "images"
 
@@ -127,6 +129,10 @@ class MLModel():
     
 ml_model = MLModel(weights='/home/nyx/dev/of3/SPARtS/Aplication/Debug Interface/mediumv3.pt', conf=0.79)
 
+def next_filename():
+    files = [f for f in os.listdir(IMAGE_DIR) if f.lower().endswith(".jpg")]
+    count = len(files) + 1
+    return os.path.join(IMAGE_DIR, f"image_{count:04d}.jpg")
 
 class ImageHandler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -180,3 +186,6 @@ def run_server():
     server = HTTPServer(("", PORT), ImageHandler)
     print(f"Server running on http://localhost:{PORT}")
     server.serve_forever()
+
+
+run_server()
