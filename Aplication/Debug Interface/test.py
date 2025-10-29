@@ -453,7 +453,10 @@ class SpartsGUI:
         if not self.api: return
         name = self.item_name_var.get()
         self.log(f"Storing item: {name}")
-        self.log("Store success." if self.api.store(True, name) else "Store failed.")
+        if(name != ""):
+            self.log("Store success." if self.api.store(True, name) else "Store failed.")
+        else:
+            self.log("Store success." if self.api.store(False, name) else "Store failed.")
         self.log("Status: "+self.api.status.name)
 
     def call_retrieve(self):

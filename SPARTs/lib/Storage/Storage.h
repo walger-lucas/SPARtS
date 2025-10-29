@@ -54,11 +54,13 @@ class OutputBucket: public Bucket {
     HX711 hx711;
     constexpr static int DT_PIN = 19, SCK_PIN=18;
     constexpr static float SCALE = 1652;
+    constexpr static float BIN_WEIGHT = 5.38f;
     
     public:
     OutputBucket(controls::Pos2i pos = {0,0},std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
     void setBin(std::weak_ptr<Bin> bin=std::weak_ptr<Bin>{});
     float updateWeight(uint8_t type);
+    void tare();
 };
 
 
