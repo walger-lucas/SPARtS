@@ -447,13 +447,19 @@ namespace storage
         uint8_t id;
         int amount;
         int uses;
+        int pos;
 
         while(file.read(reinterpret_cast<char*>(rfid.data()),sizeof(rfid))
             && file.read(reinterpret_cast<char*>(&id),sizeof(id))
             && file.read(reinterpret_cast<char*>(&amount),sizeof(amount))
-            && file.read(reinterpret_cast<char*>(&uses),sizeof(uses)))
+            && file.read(reinterpret_cast<char*>(&uses),sizeof(uses))
+            && file.read(reinterpret_cast<char*>(&pos),sizeof(pos)))
         {
             bins.push_back(std::make_shared<Bin>(rfid,amount,id,uses));
+            if(pos<buckets.size())
+            {
+                buckets[pos].setBin(bins.back());
+            }
         }
     }
     void Storage::serialize()
@@ -466,11 +472,18 @@ namespace storage
             rfid_t rfid = b->getRFID();
             uint8_t id = b->getItemId();
             int amount = b->getAmount();
+            int i;
+            for(i =0; i<buckets.size();i++)
+            {
+                if(buckets[i].getBin() == b)
+                    break;
+            }
             int uses = b->getUses();
             file.write(reinterpret_cast<const char*>(rfid.data()),sizeof(rfid));
             file.write(reinterpret_cast<const char*>(&id),sizeof(id));
             file.write(reinterpret_cast<const char*>(&amount),sizeof(amount));
             file.write(reinterpret_cast<const char*>(&uses),sizeof(uses));
+            file.write(reinterpret_cast<const char*>(&i),sizeof(i));
         }
 
         
