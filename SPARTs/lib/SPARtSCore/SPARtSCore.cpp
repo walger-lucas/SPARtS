@@ -6,6 +6,7 @@ void WiFiEvent(WiFiEvent_t event) {
     case SYSTEM_EVENT_AP_STACONNECTED: {
       wifi_sta_list_t stationList;
       tcpip_adapter_get_sta_list(&stationList, nullptr);
+      
 
       Serial.println("New station connected!");
       Serial.printf("Connected Stations: %d\n", stationList.num);

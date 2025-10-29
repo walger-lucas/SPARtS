@@ -21,4 +21,13 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    proxy: {
+      '/api/sparts': {
+        target: 'http://192.168.4.1',
+        changeOrigin: true,
+        rewrite: (p) => p.replace(/^\/api\/sparts/, '')
+      }
+    }
+  }
 })
