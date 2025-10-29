@@ -5,8 +5,8 @@ namespace controls {
     {
         switch (speed)
         {
-        case Speed::SLOW: return MAX_SPEED/4;
-        case Speed::MEDIUM: return MAX_SPEED/2;
+        case Speed::SLOW: return MAX_SPEED/2;
+        case Speed::MEDIUM: return MAX_SPEED;
         case Speed::FAST: return MAX_SPEED;
         default:    return MAX_SPEED/2;
         }
@@ -36,6 +36,7 @@ namespace controls {
         motorY.setAcceleration(getAcc(speed)*8);
 
         motorX.moveTo(x);
+        motorY.moveTo(y);
         
 
         bool endX {digitalRead(END_X_PIN)};
@@ -43,40 +44,64 @@ namespace controls {
 
         unsigned long start {millis()};
         bool runX = true, runY = true;
-        
+        int count = 0;
+        int county = 0;
+        bool endY {digitalRead(END_Y_PIN)};
         do {
             runX = motorX.run();
-
+            runY = motorY.run();
             if(!digitalRead(END_X_PIN)&&reset)
             {
                 delay(1);
-                if(!digitalRead(END_X_PIN))
+                if(count>50)
                 {
-                    
                     motorX.setCurrentPosition(0);
                     motorX.moveTo(max(0,x));
                 }
+                count++;
+            } else
+            {
+                count = 0;
             }
 
-        } while((runX)&& (millis()-start)<TIMEOUT+3000);
+            if(!digitalRead(END_Y_PIN)&&reset)
+            {
+                county++;
+                if(county>50)
+                {
+                    motorY.setCurrentPosition(0);
+                    motorY.moveTo(max(0,y));
+                }
+                delay(1);
+            } else
+            {
+                county = 0;
+            }
 
-        motorY.moveTo(y);
-        bool endY {digitalRead(END_Y_PIN)};
+        } while((runX || runY)&& (millis()-start)<TIMEOUT+3000);
+
+        
+        /*
+        count = 0;
         do {         
            
            runY = motorY.run();
 
            if(!digitalRead(END_Y_PIN)&&reset)
             {
-                delay(1);
-                if(!digitalRead(END_Y_PIN))
+                count++;
+                if(count>50)
                 {
                     motorY.setCurrentPosition(0);
                     motorY.moveTo(max(0,y));
                 }
+                delay(1);
+            } else
+            {
+                count = 0;
             }
 
-        } while((runY)&& (millis()-start)<TIMEOUT+3000);
+        } while((runY)&& (millis()-start)<TIMEOUT+3000);*/
         bool result = (millis()-start)<TIMEOUT;
         motorX.stop();
         motorY.stop();
@@ -89,8 +114,8 @@ namespace controls {
 
         bool rt = moveTo({-20000,-20000},Speed::MEDIUM,true);
         delay(100);
-        motorX.move(-50);
-        motorY.move(-50);
+        motorX.move(-30);
+        motorY.move(-30);
         motorX.runToPosition();
         motorY.runToPosition();
         motorX.setCurrentPosition(0);
@@ -153,13 +178,16 @@ namespace controls {
         motorConveyor.setAcceleration(ACCELERATION/2);
         motorConveyor.move(-200000);
         int end = digitalRead(END_CONVEYOR_PIN);
+        int count = 0;
         unsigned long time_start = millis();
-        while(end && millis()-time_start<TIMEOUT+2000){
+        while(count < 50 && millis()-time_start<TIMEOUT+2000){
                 motorConveyor.run();
                 if(!digitalRead(END_CONVEYOR_PIN))
                 {
+                    count++;
                     delay(1);
-                    end = digitalRead(END_CONVEYOR_PIN);
+                } else {
+                    count = 0;
                 }
         }
         motorConveyor.stop();
@@ -227,20 +255,23 @@ namespace controls {
     {
         if(pos==dir)
            return true;
-        delay(500);
         
         servo.write(getSpeed(dir,speed));
         unsigned long start = millis();
         start = millis();
         if(onEnd())
         {
-            while(onEnd() && millis()-start < 1500){delay(10);};
-            delay(100);
+            int count = 0;
+            while(count<50 && millis()-start < 1500)
+            {
+                if(!onEnd()) count++; else count = 0; 
+            };
+            delay(50);
         }
         //servo.write(getSpeed(dir,Speed::FAST));
-        bool end = onEnd();
-        while(!onEnd() && millis()-start< TIMEOUT){
-            delay(10);
+        int count = 0;
+        while(count < 50 && millis()-start< TIMEOUT){
+            if(onEnd()) count++; else count = 0; 
         };
         servo.write(90);
         

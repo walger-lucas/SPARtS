@@ -89,9 +89,9 @@ namespace storage
     {
         if(isEmpty())
             return 0;
-        delay(2000);
-        hx711.wait_ready(1000);
-        float weight = hx711.get_units(20)-BIN_WEIGHT;
+        delay(1000);
+        hx711.wait_ready(200);
+        float weight = hx711.get_units(10)-BIN_WEIGHT;
         float item_weight = Item::getWeight(type);
         if(weight<1.2f)
         {
@@ -391,11 +391,11 @@ namespace storage
         SPIFFS.begin(true,"/spiffs");
         //start spiffs
         int offset_x=0, offset_y=0;
-        int x_positions[] = {60,360,660,960,1260};
-        int y_positions[] = {40,380,720,1060,1400,1740};
+        int x_positions[] = {70,360,660,960,1260};
+        int y_positions[] = {20,360,700,1040,1380,1720};
 
-        buckets[0] = Bucket({630,y_positions[5]});
-        buckets[1] = Bucket({935,y_positions[5]});
+        buckets[0] = Bucket({647,y_positions[5]});
+        buckets[1] = Bucket({940,y_positions[5]});
         buckets[2] = Bucket({1240,y_positions[5]});
         buckets[3] = Bucket({1240,y_positions[4]});
         buckets[4] = Bucket({950,y_positions[4]});
@@ -405,22 +405,22 @@ namespace storage
         buckets[8] = Bucket({1250,y_positions[3]});
 
 
-        buckets[9] = Bucket({x_positions[4],y_positions[2]});
-        buckets[10] = Bucket({x_positions[3],y_positions[2]});
-        buckets[11] = Bucket({x_positions[2],y_positions[2]});
-        buckets[12] = Bucket({x_positions[1],y_positions[2]});
-        buckets[13] = Bucket({x_positions[0],y_positions[2]});
-        buckets[14] = Bucket({x_positions[0],y_positions[1]});
-        buckets[15] = Bucket({x_positions[1],y_positions[1]});
-        buckets[16] = Bucket({x_positions[2],y_positions[1]});
-        buckets[17] = Bucket({x_positions[3],y_positions[1]});
-        buckets[18] = Bucket({x_positions[4],y_positions[1]});
-        buckets[19] =  Bucket({x_positions[4],y_positions[0]});
-        buckets[20] = Bucket({x_positions[3],y_positions[0]});
-        buckets[21] = Bucket({x_positions[2],y_positions[0]});
-        buckets[22] = Bucket({x_positions[1],y_positions[0]});
-        buckets[23] = Bucket({x_positions[0],y_positions[0]});
-        interface_bucket = OutputBucket({30,1400});
+        buckets[9] = Bucket({1270,y_positions[2]});
+        buckets[10] = Bucket({970,y_positions[2]});
+        buckets[11] = Bucket({665,y_positions[2]});
+        buckets[12] = Bucket({355,y_positions[2]});
+        buckets[13] = Bucket({55,y_positions[2]});
+        buckets[14] = Bucket({70,y_positions[1]});
+        buckets[15] = Bucket({355,y_positions[1]});
+        buckets[16] = Bucket({665,y_positions[1]});
+        buckets[17] = Bucket({970,y_positions[1]});
+        buckets[18] = Bucket({1260,y_positions[1]});
+        buckets[19] =  Bucket({1270,y_positions[0]});
+        buckets[20] = Bucket({970,y_positions[0]});
+        buckets[21] = Bucket({663,y_positions[0]});
+        buckets[22] = Bucket({363,y_positions[0]});
+        buckets[23] = Bucket({70,y_positions[0]});
+        interface_bucket = OutputBucket({40,1380});
 
         desserialize();
         mov_control.init();

@@ -97,7 +97,7 @@ class PlatformControl
 using rfid_t = std::array<uint8_t,12> ;
 class MovementControl {
     private:
-    static constexpr int STEPS_TO_UP_BIN {50};
+    static constexpr int STEPS_TO_UP_BIN {80};
     MFRC522DriverPinSimple pin{15};
     SPIClass &spiClass = SPI;
     const SPISettings spiSettings = SPISettings(SPI_CLOCK_DIV4, MSBFIRST, SPI_MODE0); // May have to be set if hardware is not fully compatible to Arduino specifications.
