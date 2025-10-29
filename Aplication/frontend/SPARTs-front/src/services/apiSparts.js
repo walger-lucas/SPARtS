@@ -25,6 +25,10 @@ export default class ApiSpartsClient {
     return { ok: res.ok, status: res.status, json, text };
   }
 
+  async saveJSON(json){
+  
+  }
+
   // Poll /status until state === 'FINISHED' (or timeout)
   async awaitFinish({ interval = this.pollInterval, timeout = this.timeout } = {}) {
     const start = Date.now();

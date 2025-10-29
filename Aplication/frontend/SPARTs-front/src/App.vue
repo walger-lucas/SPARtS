@@ -60,6 +60,7 @@ async function map() {
   message.value = 'Fazendo map';
   try {
     const res = await sparts.map(); // => resolve com {ok: true, status, itemName}
+    getBins();
     message.value = `Map concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -234,7 +235,7 @@ async function read(id) {
 
     <Dialog v-model:visible="dialogSearch" modal header="Search Item" :style="{ width: '50rem' }">
       <div>
-        <DataTable :value="products" :filters="filters" filterDisplay="menu" tableStyle="min-width: 50rem">
+        <DataTable :value="bins" :filters="filters" filterDisplay="menu" tableStyle="min-width: 50rem">
 
           <template #header>
           <div class="flex flex-wrap items-center justify-between gap-2">
@@ -247,11 +248,12 @@ async function read(id) {
 
           <Column header="Action">
             <template #body="slotProps">
-              <Button icon="pi pi-search" class="p-button-rounded" label="Fetch item" />
+              <Button icon="pi pi-search" class="p-button-rounded" label="Fetch item"  @click="retrieve(slotProps.data.rfid)"/>
+              {{ slotProps.data.rfid }}
             </template>
           </Column>
 
-          <Column field="name" header="Name"></Column>
+          <Column field="item_name" header="Name"></Column>
 
           <Column header="Image">
             <template #body="slotProps">
@@ -259,7 +261,7 @@ async function read(id) {
             </template>
           </Column>
 
-          <Column field="quantity" header="Quantity"></Column>
+          <Column field="amount" header="Quantity"></Column>
 
         </DataTable>
       </div>

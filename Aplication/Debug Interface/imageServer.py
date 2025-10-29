@@ -127,7 +127,7 @@ class MLModel():
 
         return response, annotated_img
     
-ml_model = MLModel(weights='/home/nyx/dev/of3/SPARtS/Aplication/Debug Interface/mediumv3.pt', conf=0.79)
+ml_model = MLModel(weights='mediumv3.pt', conf=0.79)
 
 def next_filename():
     files = [f for f in os.listdir(IMAGE_DIR) if f.lower().endswith(".jpg")]
@@ -187,5 +187,6 @@ def run_server():
     print(f"Server running on http://localhost:{PORT}")
     server.serve_forever()
 
-
-run_server()
+if __name__ == "__main__":
+    
+    run_server()
