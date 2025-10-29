@@ -80,6 +80,7 @@ namespace storage
     {
         hx711.begin(DT_PIN,SCK_PIN);
         hx711.set_scale(SCALE);
+        delay(1000);
         hx711.wait_ready(1000);
         hx711.tare();
     }
@@ -88,13 +89,32 @@ namespace storage
     {
         if(isEmpty())
             return 0;
-        
+        delay(2000);
         hx711.wait_ready(1000);
-        float weight = hx711.get_units(20);
-        getBin()->setAmount((weight+0.5)/Item::getWeight(type));
+        float weight = hx711.get_units(20)-BIN_WEIGHT;
+        float item_weight = Item::getWeight(type);
+        if(weight<1.2f)
+        {
+            getBin()->setAmount(0);
+        }else
+        {
+            
+            getBin()->setAmount((weight+0.5*item_weight)/item_weight);
+        }
+
+        if(getBin()->getAmount()<=0)
+            getBin()->setItemId(0);
+
         printf("WEIGHT UPDATED TO: %f g\n",weight);
         return weight;
 
+    }
+
+    void OutputBucket::tare()
+    {
+        delay(1000);
+        hx711.wait_ready(1000);
+        hx711.tare();
     }
 
     void OutputBucket::setBin(std::weak_ptr<Bin> bin)
@@ -404,7 +424,14 @@ namespace storage
 
         desserialize();
         mov_control.init();
+        mov_control.xy_table.moveTo(interface_bucket.getPos(),controls::Speed::FAST);
+        rfid_t rfid;
+        bool found_bin = mov_control.readAndFetch(rfid);
+        interface_bucket.tare();
+        if(found_bin)
+            mov_control.store();
         //map();
+        
     }
 
     void Storage::desserialize()
