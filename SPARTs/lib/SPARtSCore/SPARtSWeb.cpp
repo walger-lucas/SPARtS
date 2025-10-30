@@ -1,28 +1,47 @@
-
 #include <SPARtSCore.h>
-
 #include <ArduinoJson.h>
+
+static void addCorsHeaders(AsyncWebServerResponse *response) {
+  // Em desenvolvimento pode usar "*", em produção substitua pela origem correta
+  response->addHeader("Access-Control-Allow-Origin", "*");
+  response->addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  response->addHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept");
+  response->addHeader("Access-Control-Max-Age", "600");
+}
+
+// Helpers para enviar respostas com CORS
+static void sendCorsJson(AsyncWebServerRequest *req, int code, const String &json) {
+  AsyncWebServerResponse *resp = req->beginResponse(code, "application/json", json);
+  addCorsHeaders(resp);
+  req->send(resp);
+}
+
+static void sendCorsEmpty(AsyncWebServerRequest *req, int code) {
+  AsyncWebServerResponse *resp = req->beginResponse(code, "text/plain", "");
+  addCorsHeaders(resp);
+  req->send(resp);
+}
 
 static void handleBins(AsyncWebServerRequest *req, SPARtSCore* core)
 {
     String json = core->get_json_data();
-    req->send(200, "application/json", json);
+    sendCorsJson(req, 200, json);
 }
 
 static void handleStatus(AsyncWebServerRequest *req, SPARtSCore* core)
 {
     String json = core->get_json_state();
-    req->send(200, "application/json", json);
+    sendCorsJson(req, 200, json);
 }
 
 static void handleCaptureImage(AsyncWebServerRequest *req, SPARtSCore* core)
 {
     if(core->process_image())
     {
-        req->send(200);
+        sendCorsEmpty(req, 200);
     } else
     {
-        req->send(503);
+        sendCorsEmpty(req, 503);
     }
 }
 
@@ -30,10 +49,10 @@ static void handleMap(AsyncWebServerRequest *req, SPARtSCore* core)
 {
     if(core->remap())
     {
-        req->send(200);
+        sendCorsEmpty(req, 200);
     } else
     {
-        req->send(503);
+        sendCorsEmpty(req, 503);
     }
 }
 
@@ -41,10 +60,10 @@ static void handleReorganize(AsyncWebServerRequest *req, SPARtSCore* core)
 {
     if(core->reorganize())
     {
-        req->send(200);
+        sendCorsEmpty(req, 200);
     } else
     {
-        req->send(503);
+        sendCorsEmpty(req, 503);
     }
 }
 
@@ -52,10 +71,10 @@ static void handleAutoStore(AsyncWebServerRequest *req, SPARtSCore* core)
 {
     if(core->auto_store())
     {
-        req->send(200);
+        sendCorsEmpty(req, 200);
     } else
     {
-        req->send(503);
+        sendCorsEmpty(req, 503);
     }
 }
 
@@ -63,21 +82,22 @@ static void handleStore(AsyncWebServerRequest *req, uint8_t *data, size_t len, s
 {
     if(len == 0) {
         if(core->store_item(0, 0)) {
-            req->send(200);
+            sendCorsEmpty(req, 200);
         } else {
-            req->send(503);
+            sendCorsEmpty(req, 503);
         }
         return;
     }
 
-    JsonDocument doc;
+    // Use DynamicJsonDocument with reasonable capacity
+    DynamicJsonDocument doc(512);
     DeserializationError err = deserializeJson(doc, data, len);
     if(err) {
         // If JSON is invalid, treat it as empty
         if(core->store_item(0, 0)) {
-            req->send(200);
+            sendCorsEmpty(req, 200);
         } else {
-            req->send(503);
+            sendCorsEmpty(req, 503);
         }
         return;
     }
@@ -85,9 +105,9 @@ static void handleStore(AsyncWebServerRequest *req, uint8_t *data, size_t len, s
     // Check if JSON object is empty
     if(doc.is<JsonObject>() && doc.size() == 0) {
         if(core->store_item(0, 0)) {
-            req->send(200);
+            sendCorsEmpty(req, 200);
         } else {
-            req->send(503);
+            sendCorsEmpty(req, 503);
         }
         return;
     }
@@ -97,18 +117,18 @@ static void handleStore(AsyncWebServerRequest *req, uint8_t *data, size_t len, s
     if(item_name.length() == 0) {
         // treat missing item_name as empty
         if(core->store_item(0, 0)) {
-            req->send(200);
+            sendCorsEmpty(req, 200);
         } else {
-            req->send(503);
+            sendCorsEmpty(req, 503);
         }
         return;
     }
 
     // Store the item
     if(core->store_item(1, Item::getId(item_name))) {
-        req->send(200);
+        sendCorsEmpty(req, 200);
     } else {
-        req->send(503);
+        sendCorsEmpty(req, 503);
     }
 }
 
@@ -130,27 +150,27 @@ static controls::rfid_t hexStringToArray12(const std::string& hexStr) {
 static void handleRetrieve(AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total,SPARtSCore* core)
 {
     if(len == 0) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
-    JsonDocument doc;
+    DynamicJsonDocument doc(256);
     DeserializationError err = deserializeJson(doc, data, len);
     if(err) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
     // Check if JSON object is empty
     if(doc.is<JsonObject>() && doc.size() == 0) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
     // Process normal JSON with item_name
     String rfid = doc["rfid"] | ""; // default to empty
     if(rfid.length() != 24) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
     controls::rfid_t rfid_val = hexStringToArray12(rfid.c_str());
@@ -158,99 +178,99 @@ static void handleRetrieve(AsyncWebServerRequest *req, uint8_t *data, size_t len
 
     // Retrieve the item
     if(core->retrieve_item(rfid_val)) {
-        req->send(200);
+        sendCorsEmpty(req, 200);
     } else {
-        req->send(503);
+        sendCorsEmpty(req, 503);
     }
 }
 
 static void handleRead(AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total,SPARtSCore* core)
 {
     if(len == 0) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
-    JsonDocument doc;
+    DynamicJsonDocument doc(128);
     DeserializationError err = deserializeJson(doc, data, len);
     if(err) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
     // Check if JSON object is empty
     if(doc.is<JsonObject>() && doc.size() == 0) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
     // Process normal JSON with item_name
     
     uint8_t id = doc["id"] | 55; // default to empty
     if(id == 55) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
     // Retrieve the item
     if(core->read_bucket(id)) {
-        req->send(200);
+        sendCorsEmpty(req, 200);
     } else {
-        req->send(503);
+        sendCorsEmpty(req, 503);
     }
 }
 
 static void handleSetup(AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total,SPARtSCore* core)
 {
     if(len == 0) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
-    JsonDocument doc;
+    DynamicJsonDocument doc(512);
     DeserializationError err = deserializeJson(doc, data, len);
     if(err) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
     // Check if JSON object is empty
     if(doc.is<JsonObject>() && doc.size() == 0) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
     // Process normal JSON with item_name
     String url = doc["image_processing_uri"] | ""; // default to empty
     if(url.length() == 0) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
     // Retrieve the item
     if(core->setup(url)) {
-        req->send(200);
+        sendCorsEmpty(req, 200);
     } else {
-        req->send(503);
+        sendCorsEmpty(req, 503);
     }
 }
 
 static void handleDebugMove(AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total,SPARtSCore* core)
 {
     if(len == 0) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
-    JsonDocument doc;
+    DynamicJsonDocument doc(128);
     DeserializationError err = deserializeJson(doc, data, len);
     if(err) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
     // Check if JSON object is empty
     if(doc.is<JsonObject>() && doc.size() == 0) {
-        req->send(400);
+        sendCorsEmpty(req, 400);
         return;
     }
 
@@ -259,14 +279,8 @@ static void handleDebugMove(AsyncWebServerRequest *req, uint8_t *data, size_t le
     int y = doc["y"] | 0;
 
     core->storage.mov_control.xy_table.moveTo({x,y});
-    req->send(200);
+    sendCorsEmpty(req, 200);
 }
-
-
-
-
-
-
 
 // Wrapper for AsyncWebServer to pass SystemData*
 void SPARtSCore::setupWebServer() {
@@ -293,17 +307,30 @@ void SPARtSCore::setupWebServer() {
   server.on("/debug/move", HTTP_POST,[](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
    {printf("[DEBUG] MOVE\n"); handleDebugMove(req,data,len,index,total, this); });
   server.on("/debug/calibrate/xy", HTTP_POST, [this](AsyncWebServerRequest *req)
-  {printf("[DEBUG] CALIBRATE XY\n"); storage.mov_control.xy_table.calibrate();req->send(200); });
+  {printf("[DEBUG] CALIBRATE XY\n"); storage.mov_control.xy_table.calibrate();sendCorsEmpty(req,200); });
   server.on("/debug/calibrate/conveyor", HTTP_POST, [this](AsyncWebServerRequest *req)
-  {printf("[DEBUG] CALIBRATE CONVEYOR\n"); conveyor.start();req->send(200); });
+  {printf("[DEBUG] CALIBRATE CONVEYOR\n"); conveyor.start();sendCorsEmpty(req,200); });
   server.on("/debug/calibrate/platform", HTTP_POST, [this](AsyncWebServerRequest *req)
-  {printf("[DEBUG] CALIBRATE PLATFORM\n"); storage.mov_control.platform.calibrate();req->send(200); });
+  {printf("[DEBUG] CALIBRATE PLATFORM\n"); storage.mov_control.platform.calibrate();sendCorsEmpty(req,200); });
   server.on("/debug/platform/extend", HTTP_POST, [this](AsyncWebServerRequest *req)
-  {printf("[DEBUG] EXTEND\n"); storage.mov_control.platform.move(controls::PlatformControl::Direction::EXTEND,controls::Speed::FAST);req->send(200); });
+  {printf("[DEBUG] EXTEND\n"); storage.mov_control.platform.move(controls::PlatformControl::Direction::EXTEND,controls::Speed::FAST);sendCorsEmpty(req,200); });
   server.on("/debug/platform/retract", HTTP_POST, [this](AsyncWebServerRequest *req)
-  {printf("[DEBUG] RETRACT\n"); storage.mov_control.platform.move(controls::PlatformControl::Direction::RETRACT,controls::Speed::FAST);req->send(200); });
-    server.on("/debug/conveyor/next", HTTP_POST, [this](AsyncWebServerRequest *req)
-  {printf("[DEBUG] CONVEYOR NEXT\n"); conveyor.next();req->send(200); });
+  {printf("[DEBUG] RETRACT\n"); storage.mov_control.platform.move(controls::PlatformControl::Direction::RETRACT,controls::Speed::FAST);sendCorsEmpty(req,200); });
+  server.on("/debug/conveyor/next", HTTP_POST, [this](AsyncWebServerRequest *req)
+  {printf("[DEBUG] CONVEYOR NEXT\n"); conveyor.next();sendCorsEmpty(req,200); });
+
+  // Generic handler for OPTIONS preflight (handles preflight for any route)
+  server.onNotFound([](AsyncWebServerRequest *req){
+    if (req->method() == HTTP_OPTIONS) {
+      AsyncWebServerResponse *resp = req->beginResponse(204, "text/plain", "");
+      addCorsHeaders(resp);
+      req->send(resp);
+      return;
+    }
+    // If not an OPTIONS request, return 404
+    AsyncWebServerResponse *resp = req->beginResponse(404, "text/plain", "Not Found");
+    req->send(resp);
+  });
 
   server.begin();
   Serial.println("Web server started...\n");

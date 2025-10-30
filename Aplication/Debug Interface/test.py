@@ -136,7 +136,7 @@ class MLModel():
 
         return response, annotated_img
     
-ml_model = MLModel(weights='/home/nyx/dev/of3/SPARtS/Aplication/Debug Interface/mediumv3.pt', conf=0.79)
+ml_model = MLModel(weights='mediumv3.pt', conf=0.79)
 
 
 def get_local_ip():
@@ -193,6 +193,7 @@ class ImageHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"Use POST /image to upload JPEG")
+    pass
 
 
 class SpartsOpCode(Enum):

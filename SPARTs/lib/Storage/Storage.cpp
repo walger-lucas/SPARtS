@@ -392,7 +392,7 @@ namespace storage
         //start spiffs
         int offset_x=0, offset_y=0;
         int x_positions[] = {70,360,660,960,1260};
-        int y_positions[] = {20,360,700,1040,1380,1720};
+        int y_positions[] = {0,330,670,1010,1350,1695};
 
         buckets[0] = Bucket({647,y_positions[5]});
         buckets[1] = Bucket({940,y_positions[5]});

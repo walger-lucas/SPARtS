@@ -1,11 +1,20 @@
 <script setup>
 import { Button, Column, InputText, ToggleSwitch, Select, SelectButton, Panel } from 'primevue';
 import { ref } from 'vue';
-const connected = ref (true);
+import ApiSpartsClient from '@/services/apiSparts';
+const connected = ref (false);
 const dialogSearch = ref (false);
 const changeStoreItem = ref (false);
 const newStorageItem = ref (null);
-const readBucket = ref ({ x: null, y: null });
+const readBucket = ref (0);
+const busy = ref(false);
+const message = ref('');
+const imageUrl = ref ('http://127.0.0.1:9000/image')
+const bins = ref ([]);
+const bucketData = ref(null)
+
+
+const sparts = new ApiSpartsClient('http://192.168.4.1'); // ou '/api/sparts' se usar proxy
 
 const filters = ref({
   global: { value: null, matchMode: "contains" },
@@ -19,25 +28,161 @@ const products = ref([
   { name: "Mouse", image: "blue-t-shirt.jpg", quantity: 3 },
 ]);
 
+const SpartsOpCode = Object.freeze({
+  OK: 0,
+  FINISHED: 1,
+  OK_NEEDS_REORGANIZING: 2,
+  ERROR_OUTPUT_EMPTY : 3,
+  ERROR_OUTPUT_NOT_EMPTY : 4,
+  ERROR_BIN_NOT_FOUND : 5,
+  ERROR_FULL : 6,
+  ERROR_CAM : 7,
+  ERROR_MIXED_ITEM : 8,
+});
+
+async function setup() {
+  busy.value = true;
+  message.value = 'Enviando setup...';
+  try {
+    const res = await sparts.setup(imageUrl.value); // => resolve com {ok: true, status, itemName}
+    connected.value = true;
+    getBins();
+    message.value = `Setup concluido`;
+  } catch (err) {
+    message.value = `Erro: ${err?.message ?? String(err)}`;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function map() {
+  busy.value = true;
+  message.value = 'Fazendo map';
+  try {
+    const res = await sparts.map(); // => resolve com {ok: true, status, itemName}
+    getBins();
+    message.value = `Map concluido`;
+  } catch (err) {
+    message.value = `Erro: ${err?.message ?? String(err)}`;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function organize() {
+  busy.value = true;
+  message.value = 'Fazendo map';
+  try {
+    const res = await sparts.organize(); // => resolve com {ok: true, status, itemName}
+    message.value = `Organize concluido`;
+  } catch (err) {
+    message.value = `Erro: ${err?.message ?? String(err)}`;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function autoStore() {
+  busy.value = true;
+  message.value = 'Fazendo autostore';
+  try {
+    const res = await sparts.autoStore(); // => resolve com {ok: true, status, itemName}
+    message.value = `Autostore concluido`;
+  } catch (err) {
+    message.value = `Erro: ${err?.message ?? String(err)}`;
+  } finally {
+    busy.value = false;
+  }
+} 
+
+async function image() {
+  busy.value = true;
+  message.value = 'Capturando imagem';
+  try {
+    const res = await sparts.image(); // => resolve com {ok: true, status, itemName}
+    message.value = `Imagem capturada`;
+  } catch (err) {
+    message.value = `Erro: ${err?.message ?? String(err)}`;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function getBins() {
+  busy.value = true;
+  message.value = 'Fazendo getBins';
+  try {
+    const res = await sparts.getBins(); // => resolve com {ok: true, status, itemName}
+    bins.value = res.bins;
+    message.value = `GetBins concluido`;
+  } catch (err) {
+    message.value = `Erro: ${err?.message ?? String(err)}`;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function store(changeType, newItem) {
+  busy.value = true;
+  message.value = 'Fazendo store';
+  try {
+    const res = await sparts.store(changeType, newItem); // => resolve com {ok: true, status, itemName}
+    message.value = `Store concluido`;
+  } catch (err) {
+    message.value = `Erro: ${err?.message ?? String(err)}`;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function retrieve(rfidText) {
+  busy.value = true;
+  message.value = 'Fazendo retrieve';
+  try {
+    const res = await sparts.retrieve(rfidText); // => resolve com {ok: true, status, itemName}
+    message.value = `Retrieve concluido`;
+  } catch (err) {
+    message.value = `Erro: ${err?.message ?? String(err)}`;
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function read(id) {
+  busy.value = true;
+  message.value = 'Fazendo read';
+  
+  try {
+    const res = await sparts.read(id); // => resolve com {ok: true, status, itemName}
+    message.value = `Read concluido`;
+  } catch (err) {
+    message.value = `Erro: ${err?.message ?? String(err)}`;
+  } finally {
+    busy.value = false;
+  }
+}
+
+
 </script>
 
 <template>
   <div>
+    {{ bins }}
     <Panel class="mb-3">
       <div class="grid justify-content-center">
-          <Button class="col-8" label="Connect to SPARTs" v-model:disabled="connected" />
+          <Button class="col-8" label="Connect to SPARTs" v-model:disabled="connected" @click="setup" />
       </div>
       <div class="grid justify-content-center mt-3">
           <Button class="col-8" label="Search item" @click="dialogSearch = true" :disabled="!connected"/>
       </div>
       <div class="grid justify-content-center mt-3">
-          <Button class="col-8" label="Remap" :disabled="!connected"/>
+          <Button class="col-8" label="Remap" :disabled="!connected" @click="map"/>
       </div>
       <div class="grid justify-content-center mt-3">
-          <Button class="col-8" label="Automatic Storage" :disabled="!connected"/>
+          <Button class="col-8" label="Automatic Storage" :disabled="!connected" @click="autoStore"/>
       </div>
       <div class="grid justify-content-center mt-3">
-          <Button class="col-8" label="Reorganize" :disabled="!connected"/>
+          <Button class="col-8" label="Reorganize" :disabled="!connected" @click="organize"/>
       </div>
     </Panel>
     <Panel header="Store Bin" class="mb-3">
@@ -62,6 +207,7 @@ const products = ref([
           class="col-4"
           label="Store bin"
           :disabled="!connected"
+          @click="store(changeStoreItem, newStorageItem)"
         />
       </div>
     </Panel>
@@ -69,20 +215,16 @@ const products = ref([
       <div  class="grid justify-content-center align-items-center mt-3">
         <InputText
           class="col-1 mr-3"
-          v-model="readBucket.x"
-          placeholder="X Position"
+          v-model.number="readBucket"
+          placeholder="Bin to Read"
           :disabled="!connected"
-        />
-        <InputText
-          class="col-1 mr-3"
-          v-model="readBucket.y"
-          placeholder="Y Position"
-          :disabled="!connected"
+          
         />
         <Button
           class="col-1"
           label="Read Bucket"
           :disabled="!connected"
+          @click="read(readBucket)"
         />
         
       </div>
@@ -93,7 +235,7 @@ const products = ref([
 
     <Dialog v-model:visible="dialogSearch" modal header="Search Item" :style="{ width: '50rem' }">
       <div>
-        <DataTable :value="products" :filters="filters" filterDisplay="menu" tableStyle="min-width: 50rem">
+        <DataTable :value="bins" :filters="filters" filterDisplay="menu" tableStyle="min-width: 50rem">
 
           <template #header>
           <div class="flex flex-wrap items-center justify-between gap-2">
@@ -106,11 +248,12 @@ const products = ref([
 
           <Column header="Action">
             <template #body="slotProps">
-              <Button icon="pi pi-search" class="p-button-rounded" label="Fetch item" />
+              <Button icon="pi pi-search" class="p-button-rounded" label="Fetch item"  @click="retrieve(slotProps.data.rfid)"/>
+              {{ slotProps.data.rfid }}
             </template>
           </Column>
 
-          <Column field="name" header="Name"></Column>
+          <Column field="item_name" header="Name"></Column>
 
           <Column header="Image">
             <template #body="slotProps">
@@ -118,7 +261,7 @@ const products = ref([
             </template>
           </Column>
 
-          <Column field="quantity" header="Quantity"></Column>
+          <Column field="amount" header="Quantity"></Column>
 
         </DataTable>
       </div>
