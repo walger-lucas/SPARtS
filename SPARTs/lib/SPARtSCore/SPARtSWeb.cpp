@@ -56,16 +56,51 @@ static void handleMap(AsyncWebServerRequest *req, SPARtSCore* core)
     }
 }
 
-static void handleReorganize(AsyncWebServerRequest *req, SPARtSCore* core)
+static void handleReorganize(AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total,SPARtSCore* core)
 {
-    if(core->reorganize())
-    {
+    if(len == 0) {
+        if(core->reorganize(true)) {
+            sendCorsEmpty(req, 200);
+        } else {
+            sendCorsEmpty(req, 503);
+        }
+        return;
+    }
+
+    // Use DynamicJsonDocument with reasonable capacity
+    DynamicJsonDocument doc(512);
+    DeserializationError err = deserializeJson(doc, data, len);
+    if(err) {
+        // If JSON is invalid, treat it as empty
+        if(core->reorganize(true)) {
+            sendCorsEmpty(req, 200);
+        } else {
+            sendCorsEmpty(req, 503);
+        }
+        return;
+    }
+
+    // Check if JSON object is empty
+    if(doc.is<JsonObject>() && doc.size() == 0) {
+        if(core->reorganize(true)) {
+            sendCorsEmpty(req, 200);
+        } else {
+            sendCorsEmpty(req, 503);
+        }
+        return;
+    }
+
+    // Process normal JSON with item_name
+    bool reweight = doc["reweight"] | true; // default to empty
+
+    // Store the item
+    if(core->reorganize(reweight)) {
         sendCorsEmpty(req, 200);
-    } else
-    {
+    } else {
         sendCorsEmpty(req, 503);
     }
 }
+
 
 static void handleAutoStore(AsyncWebServerRequest *req, SPARtSCore* core)
 {
@@ -286,11 +321,13 @@ static void handleDebugMove(AsyncWebServerRequest *req, uint8_t *data, size_t le
 void SPARtSCore::setupWebServer() {
   server.on("/bins", HTTP_GET, [this](AsyncWebServerRequest *req){ handleBins(req, this); });
   server.on("/remap", HTTP_POST, [this](AsyncWebServerRequest *req){ handleMap(req, this); });
-  server.on("/reorganize", HTTP_POST, [this](AsyncWebServerRequest *req){ handleReorganize(req, this); });
+  
   server.on("/status", HTTP_GET, [this](AsyncWebServerRequest *req){ handleStatus(req, this); });
   server.on("/capture_image", HTTP_POST, [this](AsyncWebServerRequest *req){ handleCaptureImage(req, this); });
   server.on("/auto_store", HTTP_POST, [this](AsyncWebServerRequest *req){ handleAutoStore(req, this); });
 
+    server.on("/reorganize", HTTP_POST, [this](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
+   { handleReorganize(req,data,len,index,total, this); });
 
   server.on("/store", HTTP_POST,[](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
    { handleStore(req,data,len,index,total, this); });

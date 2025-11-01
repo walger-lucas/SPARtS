@@ -295,7 +295,7 @@ namespace controls {
         Pos2i initial = xy_table.getPos();
         xy_table.moveTo(initial+Pos2i{0,STEPS_TO_UP_BIN},Speed::MEDIUM);
         platform.move(PlatformControl::Direction::EXTEND,Speed::MEDIUM);
-        xy_table.moveTo(initial,Speed::SLOW);
+        xy_table.moveTo(initial,Speed::MEDIUM);
         platform.move(PlatformControl::Direction::RETRACT,Speed::FAST);
     }
     bool MovementControl::read(rfid_t& rfid)

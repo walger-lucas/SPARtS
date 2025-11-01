@@ -5,6 +5,7 @@
 #include <vector>
 #include <Item.h>
 #include <HX711.h>
+#include <list>
 namespace storage
 {
     
@@ -73,6 +74,11 @@ class Storage {
     bool move(Bucket* src, Bucket* dst,bool force = false);
     void desserialize();
     void serialize();
+
+    std::list<int> organized_storage();
+
+    std::list<Bucket*> organize_bucket_order();
+
     public:
     controls::MovementControl mov_control;
     enum OperationStatus
@@ -90,11 +96,11 @@ class Storage {
     OperationStatus map();
     OperationStatus store(bool change_id=false,uint8_t item_id=0); //serialize after reading the weight
     OperationStatus retrieve(rfid_t& rfid); //serialize at the end
-    OperationStatus reorganize();
+    OperationStatus reorganize(bool reweight = true);
     Bucket* readBucketFromId(int id);
     Bucket* readBucket(Bucket* bucket);
     Bucket* getBucketByRfid(rfid_t& rfid);
-    Bucket* getEmptyBucket(int uses);
+    std::vector<Bucket*> getEmptyBucket(int uses);
     Bucket* FindFittingBucket(int amount, uint8_t type);
     std::weak_ptr<Bin> getBinByRfid(rfid_t& rfid);
     std::vector<Bucket*> getBucketByType(uint8_t type_id);

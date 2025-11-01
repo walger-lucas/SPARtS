@@ -35,6 +35,7 @@ private:
     uint8_t last_object_sawn = 0;
     storage::Storage::OperationStatus last_storage_status = storage::Storage::OperationStatus::OK;
     AsyncWebServer server {80};
+    bool reweight = false;
 
     storage::Storage::OperationStatus auto_store_state();
 public:
@@ -182,10 +183,11 @@ public:
         }
         return false;
     }
-    bool reorganize()
+    bool reorganize(bool reweight)
     {
         if(getState() == State::IDLE)
         {
+            this->reweight = reweight;
             next_state = State::REORGANIZE;
             xEventGroupSetBits(evg, 0x01);
             return true;

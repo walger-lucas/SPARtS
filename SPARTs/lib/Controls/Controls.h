@@ -26,11 +26,14 @@ struct Pos2i {
     static double distance(const Pos2i pos1, const Pos2i pos2)
     {
         int delta_x = (pos1.x-pos2.x), delta_y = (pos1.y-pos2.y);
-        return sqrt(delta_x*delta_x+delta_y*delta_y);
+        return delta_x*delta_x+delta_y*delta_y;
     }
     
 };
-
+inline bool operator==(const Pos2i pos1,const Pos2i pos2)
+{
+    return pos1.x == pos2.x && pos1.y == pos2.y;
+}
 inline Pos2i operator+(const Pos2i pos1,const Pos2i pos2)
 {
     return {pos1.x+pos2.x,pos1.y+pos2.y};
