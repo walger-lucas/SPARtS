@@ -53,7 +53,9 @@ aplication/.env
 #ESPCAM - BEGIN=====================================================
 # Ignore Arduino/C++ credentials file
 SPARTsCam/include/credentials.hpp
-
+images/
+detimages/
+Aplication/Debug Interface/images/
 # Ignore Arduino build artifacts
 /build/
 *.o
