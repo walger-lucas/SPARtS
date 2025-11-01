@@ -3,4 +3,6 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
-
+./Aplication/images
+./Aplication/detimages
+./Aplication/"Debug Interface"/images
