@@ -9,7 +9,7 @@ export default class ApiSpartsClient {
   constructor(baseUrl = '/api/sparts', opts = {}) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
     this.status = 'OK';
-    this.imageItemName = 'None';
+    this.imageItemName = '';
     this.bins = [];
     this.pollInterval = opts.pollInterval ?? 2000; // ms
     this.timeout = opts.timeout ?? 120000; // ms
@@ -47,7 +47,7 @@ export default class ApiSpartsClient {
         if (finished) {
           // set client state
           this.status = json.status;
-          this.imageItemName = json.item_name ?? this.imageItemName;
+          this.imageItemName = json.image_type ?? this.imageItemName;
           return json;
         }
       } else {
@@ -72,8 +72,10 @@ export default class ApiSpartsClient {
   }
 
   // Endpoints equivalentes
-  async setup(imageUrl) {
-    const { ok, status, json } = await this._post('/setup', { image_processing_uri: imageUrl });
+  async setup(url) {
+    const { ok, status, json } = await this._post('/setup', { image_processing_uri: url });
+    console.log(url)
+    this.getBins()
     if (!ok) throw new Error(`setup failed (${status})`);
     await this.awaitFinish();
     return { ok: true, status: this.status, itemName: this.imageItemName };
@@ -86,8 +88,9 @@ export default class ApiSpartsClient {
     return { ok: true, status: this.status };
   }
 
-  async organize() {
-    const { ok, status } = await this._post('/reorganize');
+  async organize(reweight) {
+    const body = { reweight: reweight }
+    const { ok, status } = await this._post('/reorganize', body);
     if (!ok) throw new Error(`reorganize failed (${status})`);
     await this.awaitFinish();
     return { ok: true, status: this.status };
@@ -104,7 +107,7 @@ export default class ApiSpartsClient {
     const { ok, status } = await this._post('/capture_image');
     if (!ok) throw new Error(`capture_image failed (${status})`);
     await this.awaitFinish();
-    return { ok: true, status: this.status };
+    return { ok: true, status: this.status, itemName: this.imageItemName };
   }
 
   async getBins() {

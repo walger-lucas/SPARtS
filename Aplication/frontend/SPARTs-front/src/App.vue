@@ -1,24 +1,28 @@
 <script setup>
-import { Button, Column, InputText, ToggleSwitch, Select, SelectButton, Panel } from 'primevue';
+import { Button, Column, InputText, ToggleSwitch, Select, SelectButton, Panel, useToast, Toast } from 'primevue';
 import { ref } from 'vue';
 import ApiSpartsClient from '@/services/apiSparts';
-const connected = ref (false);
+const connected = ref (true);
 const dialogSearch = ref (false);
 const changeStoreItem = ref (false);
 const newStorageItem = ref (null);
 const readBucket = ref (0);
 const busy = ref(false);
 const message = ref('');
-const imageUrl = ref ('http://127.0.0.1:9000/image')
+const imageUrl = ref ('http://192.168.4.2:9000/image')
 const bins = ref ([]);
+const reweight = ref(false)
+const lastItem = ref('')
+const currentStatus = ref(null)
 const bucketData = ref(null)
+const toast = useToast()
 
 
 const sparts = new ApiSpartsClient('http://192.168.4.1'); // ou '/api/sparts' se usar proxy
 
 const filters = ref({
   global: { value: null, matchMode: "contains" },
-  name: { value: null, matchMode: "contains" },
+  item_name: { value: null, matchMode: "contains" },
 });
 
 // Exemplo de dados
@@ -29,23 +33,72 @@ const products = ref([
 ]);
 
 const SpartsOpCode = Object.freeze({
-  OK: 0,
-  FINISHED: 1,
-  OK_NEEDS_REORGANIZING: 2,
-  ERROR_OUTPUT_EMPTY : 3,
-  ERROR_OUTPUT_NOT_EMPTY : 4,
-  ERROR_BIN_NOT_FOUND : 5,
-  ERROR_FULL : 6,
-  ERROR_CAM : 7,
-  ERROR_MIXED_ITEM : 8,
+  OK: { code: 0, message: "Operation completed successfully" },
+  FINISHED: { code: 1, message: "Process finished" },
+  OK_NEEDS_REORGANIZING: { code: 2, message: "Success, but bins need reorganizing" },
+  ERROR_OUTPUT_EMPTY: { code: 3, message: "Output bin is empty" },
+  ERROR_OUTPUT_NOT_EMPTY: { code: 4, message: "Output bin is not empty" },
+  ERROR_BIN_NOT_FOUND: { code: 5, message: "Bin not found" },
+  ERROR_FULL: { code: 6, message: "Storage is full" },
+  ERROR_CAM: { code: 7, message: "Camera error" },
+  ERROR_MIXED_ITEM: { code: 8, message: "Mixed items detected" },
 });
+
+function showSuccess(msg) {
+  toast.add({ severity: 'success', summary: 'Sucesso', detail: msg, life: 3000 })
+}
+function showError(msg) {
+  toast.add({ severity: 'error', summary: 'Erro', detail: msg, life: 5000 })
+}
+function showInfo(msg) {
+  toast.add({ severity: 'info', summary: 'Erro', detail: msg, life: 5000 })
+}
+
+function processStatus(status){
+  switch (status) {
+    case SpartsOpCode.OK:
+      showSuccess(SpartsOpCode.OK.message)
+      break;
+    case SpartsOpCode.FINISHED:
+      showSuccess(SpartsOpCode.FINISHED.message)
+      break;
+    case SpartsOpCode.ERROR_BIN_NOT_FOUND:
+      showError(SpartsOpCode.ERROR_BIN_NOT_FOUND.message)
+      break;
+    case SpartsOpCode.ERROR_CAM:
+      showError(SpartsOpCode.ERROR_CAM.message)
+      break;
+    case SpartsOpCode.ERROR_FULL:
+      showError(SpartsOpCode.ERROR_FULL.message)
+      break;
+    case SpartsOpCode.ERROR_MIXED_ITEM:
+      showError(SpartsOpCode.ERROR_MIXED_ITEM.message)
+      break;
+    case SpartsOpCode.ERROR_OUTPUT_EMPTY:
+      showError(SpartsOpCode.ERROR_OUTPUT_EMPTY.message)
+      break;
+    case SpartsOpCode.ERROR_OUTPUT_NOT_EMPTY:
+      showError(SpartsOpCode.ERROR_OUTPUT_NOT_EMPTY.message)
+      break;
+    case SpartsOpCode.OK_NEEDS_REORGANIZING:
+      showError(SpartsOpCode.OK_NEEDS_REORGANIZING.message)
+      break;
+    default:
+      showInfo(SpartsOpCode.OK.message)
+      break;
+  }
+
+}
 
 async function setup() {
   busy.value = true;
   message.value = 'Enviando setup...';
+  showInfo("Executing Setup !")
   try {
     const res = await sparts.setup(imageUrl.value); // => resolve com {ok: true, status, itemName}
     connected.value = true;
+    currentStatus.value = res.status
+    processStatus(currentStatus.value)
     getBins();
     message.value = `Setup concluido`;
   } catch (err) {
@@ -58,8 +111,11 @@ async function setup() {
 async function map() {
   busy.value = true;
   message.value = 'Fazendo map';
+  showInfo("Executing Map")
   try {
     const res = await sparts.map(); // => resolve com {ok: true, status, itemName}
+    currentStatus.value = res.status
+    processStatus(currentStatus.value)
     getBins();
     message.value = `Map concluido`;
   } catch (err) {
@@ -72,8 +128,11 @@ async function map() {
 async function organize() {
   busy.value = true;
   message.value = 'Fazendo map';
+  showInfo("Executing Organize")
   try {
     const res = await sparts.organize(); // => resolve com {ok: true, status, itemName}
+    currentStatus.value = res.status
+    processStatus(currentStatus.value)
     message.value = `Organize concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -85,8 +144,11 @@ async function organize() {
 async function autoStore() {
   busy.value = true;
   message.value = 'Fazendo autostore';
+  showInfo("Executing Store")
   try {
     const res = await sparts.autoStore(); // => resolve com {ok: true, status, itemName}
+    currentStatus.value = res.status
+    processStatus(currentStatus.value)
     message.value = `Autostore concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -98,8 +160,13 @@ async function autoStore() {
 async function image() {
   busy.value = true;
   message.value = 'Capturando imagem';
+  showInfo("Taking Picure")
   try {
     const res = await sparts.image(); // => resolve com {ok: true, status, itemName}
+    lastItem.value = res.itemName;
+    currentStatus.value = res.status
+    processStatus(currentStatus.value)
+    filters.value.item_name.value = lastItem.value;
     message.value = `Imagem capturada`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -111,9 +178,12 @@ async function image() {
 async function getBins() {
   busy.value = true;
   message.value = 'Fazendo getBins';
+  showInfo("Getting Bins")
   try {
     const res = await sparts.getBins(); // => resolve com {ok: true, status, itemName}
     bins.value = res.bins;
+    currentStatus.value = res.status
+    processStatus(currentStatus.value)
     message.value = `GetBins concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -125,8 +195,11 @@ async function getBins() {
 async function store(changeType, newItem) {
   busy.value = true;
   message.value = 'Fazendo store';
+  showInfo("Executing Store")
   try {
     const res = await sparts.store(changeType, newItem); // => resolve com {ok: true, status, itemName}
+    currentStatus.value = res.status
+    processStatus(currentStatus.value)
     message.value = `Store concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -138,8 +211,11 @@ async function store(changeType, newItem) {
 async function retrieve(rfidText) {
   busy.value = true;
   message.value = 'Fazendo retrieve';
+  showInfo("Executing Retrieve")
   try {
     const res = await sparts.retrieve(rfidText); // => resolve com {ok: true, status, itemName}
+    currentStatus.value = res.status
+    processStatus(currentStatus.value)
     message.value = `Retrieve concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -151,9 +227,11 @@ async function retrieve(rfidText) {
 async function read(id) {
   busy.value = true;
   message.value = 'Fazendo read';
-  
+  showInfo("Reading Bucket")
   try {
     const res = await sparts.read(id); // => resolve com {ok: true, status, itemName}
+    currentStatus.value = res.status
+    processStatus(currentStatus.value)
     message.value = `Read concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -167,7 +245,7 @@ async function read(id) {
 
 <template>
   <div>
-    {{ bins }}
+    <Toast/>
     <Panel class="mb-3">
       <div class="grid justify-content-center">
           <Button class="col-8" label="Connect to SPARTs" v-model:disabled="connected" @click="setup" />
@@ -181,8 +259,23 @@ async function read(id) {
       <div class="grid justify-content-center mt-3">
           <Button class="col-8" label="Automatic Storage" :disabled="!connected" @click="autoStore"/>
       </div>
-      <div class="grid justify-content-center mt-3">
-          <Button class="col-8" label="Reorganize" :disabled="!connected" @click="organize"/>
+    </Panel>
+    
+    <Panel header="Reorganize" class="mb-3">
+       <div class="grid justify-content-center align-items-center mt-3">
+        <div class="flex flex-column align-items-center mt-3 col-2">
+          <span class="mb-2">Reweight ?</span>
+          <ToggleSwitch
+            v-model="reweight"
+          />
+        </div>
+
+        <Button
+          class="col-4"
+          label="Reorganize"
+          :disabled="!connected"
+          @click="organize(reweight)"
+        />
       </div>
     </Panel>
     <Panel header="Store Bin" class="mb-3">
@@ -198,7 +291,9 @@ async function read(id) {
           class="col-2 mr-3"
           v-model="newStorageItem"
           :disabled="!changeStoreItem"
-          :options="products"
+          :options="bins"
+          optionLabel="name"
+          optionValue="name"
           size="small"
           placeholder="Select New Item To This Bin"
         />
@@ -233,6 +328,8 @@ async function read(id) {
       </div>
     </Panel>
 
+    
+
     <Dialog v-model:visible="dialogSearch" modal header="Search Item" :style="{ width: '50rem' }">
       <div>
         <DataTable :value="bins" :filters="filters" filterDisplay="menu" tableStyle="min-width: 50rem">
@@ -241,15 +338,16 @@ async function read(id) {
           <div class="flex flex-wrap items-center justify-between gap-2">
             <span class="text-xl font-bold">Items</span>
             <span class="p-input-icon-left">
-              <InputText placeholder="Search by name" v-model="filters.name.value"/>
+              <InputText placeholder="Search by name" v-model="filters.item_name.value"/>
             </span>
+            <Button label="Find by image" @click="image" />
+
           </div>
           </template>
 
           <Column header="Action">
             <template #body="slotProps">
               <Button icon="pi pi-search" class="p-button-rounded" label="Fetch item"  @click="retrieve(slotProps.data.rfid)"/>
-              {{ slotProps.data.rfid }}
             </template>
           </Column>
 
