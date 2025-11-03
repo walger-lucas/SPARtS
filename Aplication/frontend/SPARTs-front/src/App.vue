@@ -2,7 +2,7 @@
 import { Button, Column, InputText, ToggleSwitch, Select, SelectButton, Panel, useToast, Toast } from 'primevue';
 import { ref } from 'vue';
 import ApiSpartsClient from '@/services/apiSparts';
-const connected = ref (true);
+const connected = ref (false);
 const dialogSearch = ref (false);
 const changeStoreItem = ref (false);
 const newStorageItem = ref (null);
@@ -51,7 +51,7 @@ function showError(msg) {
   toast.add({ severity: 'error', summary: 'Erro', detail: msg, life: 5000 })
 }
 function showInfo(msg) {
-  toast.add({ severity: 'info', summary: 'Erro', detail: msg, life: 5000 })
+  toast.add({ severity: 'info', summary: 'Info', detail: msg, life: 5000 })
 }
 
 function processStatus(status){
@@ -125,14 +125,15 @@ async function map() {
   }
 }
 
-async function organize() {
+async function organize(reweight) {
   busy.value = true;
   message.value = 'Fazendo map';
   showInfo("Executing Organize")
   try {
-    const res = await sparts.organize(); // => resolve com {ok: true, status, itemName}
+    const res = await sparts.organize(reweight); // => resolve com {ok: true, status, itemName}
     currentStatus.value = res.status
     processStatus(currentStatus.value)
+    getBins()
     message.value = `Organize concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -200,6 +201,7 @@ async function store(changeType, newItem) {
     const res = await sparts.store(changeType, newItem); // => resolve com {ok: true, status, itemName}
     currentStatus.value = res.status
     processStatus(currentStatus.value)
+    getBins()
     message.value = `Store concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -251,13 +253,13 @@ async function read(id) {
           <Button class="col-8" label="Connect to SPARTs" v-model:disabled="connected" @click="setup" />
       </div>
       <div class="grid justify-content-center mt-3">
-          <Button class="col-8" label="Search item" @click="dialogSearch = true" :disabled="!connected"/>
+          <Button class="col-8" label="Search item" @click="dialogSearch = true" :disabled="!connected || busy"/>
       </div>
       <div class="grid justify-content-center mt-3">
-          <Button class="col-8" label="Remap" :disabled="!connected" @click="map"/>
+          <Button class="col-8" label="Remap" :disabled="!connected || busy" @click="map"/>
       </div>
       <div class="grid justify-content-center mt-3">
-          <Button class="col-8" label="Automatic Storage" :disabled="!connected" @click="autoStore"/>
+          <Button class="col-8" label="Automatic Storage" :disabled="!connected || busy" @click="autoStore"/>
       </div>
     </Panel>
     
@@ -273,7 +275,7 @@ async function read(id) {
         <Button
           class="col-4"
           label="Reorganize"
-          :disabled="!connected"
+          :disabled="!connected || busy"
           @click="organize(reweight)"
         />
       </div>
@@ -301,7 +303,7 @@ async function read(id) {
         <Button
           class="col-4"
           label="Store bin"
-          :disabled="!connected"
+          :disabled="!connected || busy"
           @click="store(changeStoreItem, newStorageItem)"
         />
       </div>
@@ -312,13 +314,13 @@ async function read(id) {
           class="col-1 mr-3"
           v-model.number="readBucket"
           placeholder="Bin to Read"
-          :disabled="!connected"
+          :disabled="!connected || busy"
           
         />
         <Button
           class="col-1"
           label="Read Bucket"
-          :disabled="!connected"
+          :disabled="!connected || busy"
           @click="read(readBucket)"
         />
         
