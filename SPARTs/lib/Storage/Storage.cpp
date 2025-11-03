@@ -399,11 +399,11 @@ namespace storage
         }
         printf("b5\n");
         
-        current_bins.sort([](std::shared_ptr<Bin> a, std::shared_ptr<Bin> b) 
-            { return a->getUses() < b->getUses();});
+        current_bins.sort([](int a, int b) 
+            { return a < b;});
         printf("b6\n");
-        all_bins.sort([](std::shared_ptr<Bin> a, std::shared_ptr<Bin> b) 
-            { return a->getUses() < b->getUses();});
+        all_bins.sort([](int a, int b) 
+            { return a < b;});
         printf("b7\n");
 
 
@@ -481,9 +481,9 @@ namespace storage
             Bucket* src = nullptr;
             for(auto it = bu; it != bucks_org.end(); it++)
             {
-                if(!(*bu)->isEmpty() && (*bu)->getBin()->getUses() == *bi)
+                if(!(*it)->isEmpty() && (*it)->getBin()->getUses() == *bi)
                 {
-                    src = *bu;
+                    src = *it;
                     break;
                 }
             }
@@ -520,12 +520,12 @@ namespace storage
         while(bu!= bucks_org.end() && bi!= bins_org.end())
         {
             if((*bu)->isEmpty())
-                bucks.emplace_back(*bu,*bi);
+                bucks.push_back(buck_val{*bu,*bi});
             bu++;
             bi++;
         }
         //sort it by the distance its uses has from the favored use
-        std::stable_sort(bucks.begin(),bucks.end(),[uses](buck_val& a, buck_val& b){
+        std::stable_sort(bucks.begin(),bucks.end(),[uses](const buck_val& a,const buck_val& b){
             return abs(a.uses-uses) < abs(b.uses-uses);
         });
 
@@ -566,7 +566,7 @@ namespace storage
         //start spiffs
         int offset_x=0, offset_y=0;
         int x_positions[] = {70,360,660,960,1260};
-        int y_positions[] = {0,346,680,1030,1350,1685};
+        int y_positions[] = {0,346,680,1030,1350,1691};
 
         buckets[0] = Bucket({647,y_positions[5]});
         buckets[1] = Bucket({940,y_positions[5]});
@@ -583,7 +583,7 @@ namespace storage
         buckets[10] = Bucket({970,y_positions[2]});
         buckets[11] = Bucket({665,y_positions[2]});
         buckets[12] = Bucket({355,y_positions[2]});
-        buckets[13] = Bucket({55,y_positions[2]});
+        buckets[13] = Bucket({55,690});
         buckets[14] = Bucket({70,y_positions[1]});
         buckets[15] = Bucket({355,y_positions[1]});
         buckets[16] = Bucket({665,y_positions[1]});

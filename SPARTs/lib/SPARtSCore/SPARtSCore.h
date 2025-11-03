@@ -185,6 +185,7 @@ public:
     }
     bool reorganize(bool reweight)
     {
+        printf("REORG: %d\n",reweight);
         if(getState() == State::IDLE)
         {
             this->reweight = reweight;

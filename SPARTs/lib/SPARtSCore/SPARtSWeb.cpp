@@ -58,6 +58,7 @@ static void handleMap(AsyncWebServerRequest *req, SPARtSCore* core)
 
 static void handleReorganize(AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total,SPARtSCore* core)
 {
+    printf("TEST1\n");
     if(len == 0) {
         if(core->reorganize(true)) {
             sendCorsEmpty(req, 200);
@@ -66,10 +67,12 @@ static void handleReorganize(AsyncWebServerRequest *req, uint8_t *data, size_t l
         }
         return;
     }
+    printf("TEST2\n");
 
     // Use DynamicJsonDocument with reasonable capacity
     DynamicJsonDocument doc(512);
     DeserializationError err = deserializeJson(doc, data, len);
+    printf("TEST3\n");
     if(err) {
         // If JSON is invalid, treat it as empty
         if(core->reorganize(true)) {
@@ -326,7 +329,7 @@ void SPARtSCore::setupWebServer() {
   server.on("/capture_image", HTTP_POST, [this](AsyncWebServerRequest *req){ handleCaptureImage(req, this); });
   server.on("/auto_store", HTTP_POST, [this](AsyncWebServerRequest *req){ handleAutoStore(req, this); });
 
-    server.on("/reorganize", HTTP_POST, [this](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
+ server.on("/reorganize", HTTP_POST, [this](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
    { handleReorganize(req,data,len,index,total, this); });
 
   server.on("/store", HTTP_POST,[](AsyncWebServerRequest *req){ },NULL, [this](AsyncWebServerRequest *req, uint8_t *data, size_t len, size_t index, size_t total)
