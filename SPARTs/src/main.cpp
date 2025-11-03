@@ -107,6 +107,14 @@ void loop() {
 }
 /*
 #include <cam_protocol.h>
+include "load_cell.h"
+
+/*GPIO ======================================= */
+const byte DOUT_PIN = 25; //Data pin (DT).
+const byte SCK_PIN = 26;  //Clock pin (SCK).
+/*============================================ */
+
+LoadCell myLoadCell(DOUT_PIN, SCK_PIN);//Create LoadCell object.
 
 void setup(){
   Serial.begin(115200); 
@@ -114,6 +122,13 @@ void setup(){
   cam::CamCommunicationMaster::setup_comm();
   cam::CamCommunicationMaster::send_config("","","",pdMS_TO_TICKS(30000));
   
+  delay(1000); //To stabilize the serial.
+  Serial.println("--- Load Cell Reader ---");
+
+  myLoadCell.setup();//Initializes the load cell.
+
+  Serial.println("Setup complete. Readings will start shortly.");
+  Serial.println("Send 't' via serial to tare the scale.");
 }
 void loop(){
   vTaskDelay(pdMS_TO_TICKS(1000));
