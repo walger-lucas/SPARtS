@@ -6,9 +6,13 @@ import cv2
 import gc
 from enum import Enum
 from http.server import ThreadingHTTPServer, HTTPServer, BaseHTTPRequestHandler
-import os, json
+import os, json, socket
 PORT = 9000
 IMAGE_DIR = "images"
+X = 1600
+Y = 1200
+PERCENT_X_INIT, PERCENT_X_FINAL = 0.3, 0,75
+PERCENT_Y_INIT, PERCENT_Y_FINAL = 0.25, 0,9
 
 
 class MLModel():
@@ -24,7 +28,7 @@ class MLModel():
     - `conf` (float)
     Confidence threshold for detecting a valid bounding box. 
     """
-    def __init__(self, weights='yolo11n.pt', device='cuda' if torch.cuda.is_available() else 'cpu', conf=0.25):
+    def __init__(self, weights='yolo11n.pt', device='cpu', conf=0.25):
         self.weights = weights
         self.device = device
         self.conf = conf
@@ -82,7 +86,10 @@ class MLModel():
 
     def predict(self, image, draw = False):
         """ Perform predictions of detected objects """
+        y_init, y_final = int(Y*PERCENT_Y_INIT), int(Y*PERCENT_Y_FINAL)
+        x_init, x_final = int(X*PERCENT_X_INIT), int(X*PERCENT_X_FINAL)
         processed_image = cv2.imread(image)
+        processed_image = processed_image[ y_init:y_final, x_init:x_final]
 
         # Check if the image is in cv format
         if not isinstance(processed_image, (np.ndarray, np.generic)):
@@ -136,6 +143,7 @@ def next_filename():
 
 class ImageHandler(BaseHTTPRequestHandler):
     def do_POST(self):
+        print("Image handler post")
         if self.path != "/image":
             self.send_error(404, "Not Found")
             return
@@ -149,7 +157,7 @@ class ImageHandler(BaseHTTPRequestHandler):
         filename = next_filename()
         with open(filename, "wb") as f:
             f.write(image_data)
-                    
+        #cut image            
         response, annotated_image = ml_model.predict(filename, draw=True)
         
         annotated_filename = "det" + filename
@@ -167,6 +175,7 @@ class ImageHandler(BaseHTTPRequestHandler):
         print(f"📸 Saved image as {filename}")
 
     def do_GET(self):
+        print("Image handler get")
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"Use POST /image to upload JPEG")
@@ -181,6 +190,19 @@ class SpartsOpCode(Enum):
     ERROR_FULL = 5
     ERROR_CAM = 6
     ERROR_MIXED_ITEM = 7
+
+def get_local_ip():
+    """Get the local IP address of the machine."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Doesn't need to connect for real — just to get the local IP used
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    return ip
 
 def run_server():
     server = HTTPServer(("", PORT), ImageHandler)
