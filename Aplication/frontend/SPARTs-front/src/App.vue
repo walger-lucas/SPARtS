@@ -168,6 +168,7 @@ async function image() {
     currentStatus.value = res.status
     processStatus(currentStatus.value)
     filters.value.item_name.value = lastItem.value;
+    console.log("res: "+ res.value)
     message.value = `Imagem capturada`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
@@ -233,13 +234,20 @@ async function read(id) {
   try {
     const res = await sparts.read(id); // => resolve com {ok: true, status, itemName}
     currentStatus.value = res.status
+    getBins()
     processStatus(currentStatus.value)
+    bucketData.value = bins.value[id].item_name
     message.value = `Read concluido`;
   } catch (err) {
     message.value = `Erro: ${err?.message ?? String(err)}`;
   } finally {
     busy.value = false;
   }
+}
+
+async function searchItemHandler(){
+  dialogSearch.value = true
+  getBins()
 }
 
 
@@ -253,7 +261,7 @@ async function read(id) {
           <Button class="col-8" label="Connect to SPARTs" v-model:disabled="connected" @click="setup" />
       </div>
       <div class="grid justify-content-center mt-3">
-          <Button class="col-8" label="Search item" @click="dialogSearch = true" :disabled="!connected || busy"/>
+          <Button class="col-8" label="Search item" @click="searchItemHandler" :disabled="!connected || busy"/>
       </div>
       <div class="grid justify-content-center mt-3">
           <Button class="col-8" label="Remap" :disabled="!connected || busy" @click="map"/>
@@ -294,8 +302,8 @@ async function read(id) {
           v-model="newStorageItem"
           :disabled="!changeStoreItem"
           :options="bins"
-          optionLabel="name"
-          optionValue="name"
+          optionLabel="item_name"
+          optionValue="item_name"
           size="small"
           placeholder="Select New Item To This Bin"
         />
@@ -326,7 +334,7 @@ async function read(id) {
         
       </div>
       <div class="grid justify-content-center align-items-center mt-3">
-        <Span>Bucket Content: </Span>
+        <Span>Bucket Content: {{ bucketData }} </Span>
       </div>
     </Panel>
 

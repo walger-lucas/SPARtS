@@ -47,7 +47,7 @@ export default class ApiSpartsClient {
         if (finished) {
           // set client state
           this.status = json.status;
-          this.imageItemName = json.image_type ?? this.imageItemName;
+          this.imageItemName = json.item_name ?? this.imageItemName;
           return json;
         }
       } else {
@@ -78,7 +78,7 @@ export default class ApiSpartsClient {
     this.getBins()
     if (!ok) throw new Error(`setup failed (${status})`);
     await this.awaitFinish();
-    return { ok: true, status: this.status, itemName: this.imageItemName };
+    return { ok: true, status: this.status, item_name: this.imageItemName };
   }
 
   async map() {
