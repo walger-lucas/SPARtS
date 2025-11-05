@@ -48,10 +48,10 @@ function showSuccess(msg) {
   toast.add({ severity: 'success', summary: 'Sucesso', detail: msg, life: 3000 })
 }
 function showError(msg) {
-  toast.add({ severity: 'error', summary: 'Erro', detail: msg, life: 5000 })
+  toast.add({ severity: 'danger', summary: 'Erro', detail: msg, life: 8000 })
 }
 function showInfo(msg) {
-  toast.add({ severity: 'info', summary: 'Info', detail: msg, life: 5000 })
+  toast.add({ severity: 'info', summary: 'Info', detail: msg, life: 8000 })
 }
 
 function processStatus(status){
@@ -365,11 +365,14 @@ async function searchItemHandler(){
 
           <Column header="Image">
             <template #body="slotProps">
-              <img :src="`https://primefaces.org/cdn/primevue/images/product/${slotProps.data.image}`" :alt="slotProps.data.image" class="w-24 rounded" />
+              <img :src="`/images/${slotProps.item_name}.png`" class="w-24 rounded" />
             </template>
           </Column>
 
           <Column field="amount" header="Quantity"></Column>
+
+          <Column field="unit_weight" header="Unitary weight">
+          </Column>
 
         </DataTable>
       </div>
