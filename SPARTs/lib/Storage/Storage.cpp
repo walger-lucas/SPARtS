@@ -44,7 +44,7 @@ namespace storage
     }
 
     Bin::Bin(rfid_t rfid,int amount, int item_id,int uses)
-    : rfid(rfid), quantity(amount),item_id(item_id),uses(uses)
+    : rfid(rfid), quantity(amount),item_id(item_id),uses(uses), weight(amount*Item::getWeight(item_id))
     {
 
     }
@@ -106,8 +106,14 @@ namespace storage
             getBin()->setItemId(0);
 
         printf("WEIGHT UPDATED TO: %f g\n",weight);
+        getBin()->weight = weight;
         return weight;
 
+    }
+
+    float Bin::getWeight()
+    {
+        return weight;
     }
 
     void OutputBucket::tare()
@@ -698,6 +704,12 @@ namespace storage
             json += ",";
             json += "\"uses\":";
             json += String(b->getUses());
+            json += ",";
+            json += "\"unit_weight\":";
+            json += String(Item::getWeight(b->getItemId()));
+            json += ",";
+            json += "\"weight\":";
+            json += String(b->getWeight());
             json += "}";
         }
 
@@ -728,6 +740,12 @@ namespace storage
                 json += ",";
                 json += "\"uses\":";
                 json += String(b->getUses());
+                json += ",";
+                json += "\"unit_weight\":";
+                json += String(Item::getWeight(b->getItemId()));
+                json += ",";
+                json += "\"weight\":";
+                json += String(b->getWeight());
                 json += "}";
             }
 

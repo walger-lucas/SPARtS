@@ -13,14 +13,17 @@ using rfid_t = controls::rfid_t;
 
 class Bin
 {
+    friend class OutputBucket;
     rfid_t rfid;
     int quantity;
+    float weight;
     uint8_t item_id;
     int uses;
 
     public:
 
     int getAmount();
+    float getWeight();
     uint8_t getItemId();
     int getUses();
     rfid_t getRFID();
