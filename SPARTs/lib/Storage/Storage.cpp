@@ -44,7 +44,7 @@ namespace storage
     }
 
     Bin::Bin(rfid_t rfid,int amount, int item_id,int uses)
-    : rfid(rfid), quantity(amount),item_id(item_id),uses(uses)
+    : rfid(rfid), quantity(amount),item_id(item_id),uses(uses), weight(amount*Item::getWeight(item_id))
     {
 
     }
@@ -106,8 +106,14 @@ namespace storage
             getBin()->setItemId(0);
 
         printf("WEIGHT UPDATED TO: %f g\n",weight);
+        getBin()->weight = weight;
         return weight;
 
+    }
+
+    float Bin::getWeight()
+    {
+        return weight;
     }
 
     void OutputBucket::tare()
@@ -133,7 +139,6 @@ namespace storage
     {
         if(!src || !dst || src==dst)
             return true;
-        mov_control.platform.move(controls::PlatformControl::Direction::RETRACT);
         if(!force)
         {
             rfid_t rfid;
@@ -166,6 +171,8 @@ namespace storage
         }
         rfid_t rfid;
         mov_control.xy_table.moveTo(src->getPos(),controls::Speed::FAST);
+        if(mov_control.xy_table.getPos() == src->getPos())
+            delay(500);
         if(!mov_control.readAndFetch(rfid))
             return true;
         mov_control.xy_table.moveTo(dst->getPos(),controls::Speed::MEDIUM);
@@ -241,6 +248,7 @@ namespace storage
             readBucket(&bucket);
         readBucket(&interface_bucket);
         mov_control.xy_table.calibrate();
+        serialize();
         return OperationStatus::OK;
     }
 
@@ -303,12 +311,21 @@ namespace storage
         }
         interface_bucket.setBin(bin);
         serialize();
-        Bucket* buck = getEmptyBucket(bin->getUses());
-        if(buck == nullptr || !readBucket(buck)->isEmpty())
+        auto empty_bucks = getEmptyBucket(bin->getUses());
+        Bucket* buck = nullptr;
+        for(auto b : empty_bucks)
+        {
+            if(readBucket(b)->isEmpty())
+            {
+                buck = b;
+                break;
+            }
+        }
+        if(buck == nullptr)
         {
             map();
-            buck = getEmptyBucket(bin->getUses());
-            if(buck == nullptr)
+            auto empty_bucks = getEmptyBucket(bin->getUses());
+            if(empty_bucks.empty() || !move(&interface_bucket,empty_bucks[0]))
                 return ERROR_FULL;
         }
         
@@ -316,8 +333,8 @@ namespace storage
         if(!move(&interface_bucket,buck,true))
         {
             map();
-            buck = getEmptyBucket(bin->getUses());
-            if(buck == nullptr || !move(&interface_bucket,buck))
+            auto empty_bucks = getEmptyBucket(bin->getUses());
+            if(empty_bucks.empty() || !move(&interface_bucket,empty_bucks[0]))
                 return ERROR_FULL;    
                
         }
@@ -363,26 +380,189 @@ namespace storage
             return OK_NEEDS_REORGANIZING;
         return OK;
     }
-
-    Storage::OperationStatus Storage::reorganize()
+    std::list<int> Storage::organized_storage()
     {
-        //TODO
+        printf("b1\n");
+        std::list<int> all_bins;
+        std::list<int> current_bins;
+        all_bins.clear();
+        current_bins.clear();
+        printf("b2\n");
+        for(auto& el : bins)
+        {
+                all_bins.push_back(el->getUses());  
+        }
+        printf("b3\n");
+        for(auto& el : buckets)
+        {
+            if(!el.isEmpty())
+                current_bins.push_back(el.getBin()->getUses());
+        }
+        printf("b4\n");
+        if(!interface_bucket.isEmpty())
+        {
+            current_bins.push_back(interface_bucket.getBin()->getUses());
+        }
+        printf("b5\n");
+        
+        current_bins.sort([](int a, int b) 
+            { return a < b;});
+        printf("b6\n");
+        all_bins.sort([](int a, int b) 
+            { return a < b;});
+        printf("b7\n");
+
+
+        auto cur_it = current_bins.begin();
+        printf("b7.5\n");
+        auto all_it = all_bins.begin();
+        printf("b8\n");
+        if(current_bins.size() > buckets.size())
+        {
+            current_bins.reverse();
+            return current_bins;
+        }
+        printf("b9\n");
+        //remove the binspaces for empty
+        while(all_bins.size() > buckets.size())
+        {
+            printf("b10\n");
+            if(*all_it != *cur_it )
+            {
+                all_it = all_bins.erase(all_it);
+            } else
+            {
+                printf("b11\n");
+                all_it++;
+                cur_it++;
+            }
+        }
+        all_bins.reverse();
+        //push_back use 0 until bins has the same size as buckets
+        while(all_bins.size()<buckets.size())
+            all_bins.push_back(0);
+
+        return all_bins;
+    }
+    std::list<Bucket*> Storage::organize_bucket_order()
+    {
+        printf("a1\n");
+        std::list<Bucket*> all_buckets;
+        all_buckets.clear();
+        printf("a2\n");
+        for(auto& el : buckets)
+        {
+            all_buckets.push_back(&el);
+        }
+        printf("a3\n");
+        OutputBucket* inter = &interface_bucket;
+        printf("a4\n");
+        all_buckets.sort([inter](Bucket* a, Bucket* b) 
+            { return controls::Pos2i::distance(a->getPos(),inter->getPos()) < controls::Pos2i::distance(b->getPos(),inter->getPos());});
+        printf("a5\n");
+        return all_buckets;
+    }
+    Storage::OperationStatus Storage::reorganize(bool reweight)
+    {
+        map();
+        store();
+        
+        auto bucks_org = organize_bucket_order();
+        auto bins_org = organized_storage();
+        if(bins_org.size() > buckets.size())
+            return ERROR_FULL;
+        auto bu = bucks_org.begin();
+        auto bi = bins_org.begin();
+
+        while(bu != bucks_org.end() && bi != bins_org.end())
+        {
+
+            if(!(*bu)->isEmpty() && (*bu)->getBin()->getUses() == *bi && !reweight)
+            {
+                bu++;
+                bi++;
+                continue;
+            }
+            //find first bucket with a bin with that given uses
+            Bucket* src = nullptr;
+            for(auto it = bu; it != bucks_org.end(); it++)
+            {
+                if(!(*it)->isEmpty() && (*it)->getBin()->getUses() == *bi)
+                {
+                    src = *it;
+                    break;
+                }
+            }
+            if(src)
+            {
+                move(src,&interface_bucket,true);
+                if(!(*bu)->isEmpty())
+                    move(*bu,src,true);
+                move(&interface_bucket,*bu,true);
+            }
+            bu++;
+            bi++;
+        }
+        
+        
         return OK;
     }
 
-    Bucket* Storage::getEmptyBucket(int uses)
+    std::vector<Bucket*> Storage::getEmptyBucket(int uses)
     {
         //TODO MAKE IT GET IN CONSIDERATION USES TO PUT IT CLOSER TO THE POSITION IT NEEDS TO BE
-        for(auto & b : buckets)
+
+        //Create vector with a relation bucket x use it should have, only for empty buckets
+        auto bucks_org = organize_bucket_order();
+        auto bins_org = organized_storage();
+        struct buck_val
         {
-            if(b.isEmpty())
-                return &b;
+            Bucket* buck;
+            int uses;
+        };
+        std::vector<buck_val> bucks;
+        auto bu = bucks_org.begin();
+        auto bi = bins_org.begin();
+        while(bu!= bucks_org.end() && bi!= bins_org.end())
+        {
+            if((*bu)->isEmpty())
+                bucks.push_back(buck_val{*bu,*bi});
+            bu++;
+            bi++;
         }
-        return nullptr;
+        //sort it by the distance its uses has from the favored use
+        std::stable_sort(bucks.begin(),bucks.end(),[uses](const buck_val& a,const buck_val& b){
+            return abs(a.uses-uses) < abs(b.uses-uses);
+        });
+
+        std::vector<Bucket*> empty_buckets;
+        for(auto& el : bucks)
+        {
+            empty_buckets.push_back(el.buck);
+        }
+
+        return empty_buckets;
     }
 
     bool Storage::needsReorganizing()
     {
+        auto bins_org = organized_storage();
+        auto bucks_org = organize_bucket_order();
+
+        if(bins_org.size()> buckets.size())
+            return false;
+        auto bu = bucks_org.begin();
+        auto bi = bins_org.begin();
+
+        while(bu != bucks_org.end() && bi != bins_org.end())
+        {
+            if(!(*bu)->isEmpty() && (*bu)->getBin()->getUses() != *bi)
+            {
+                return true;
+            }
+            bu++;
+            bi++;
+        }
         //analyze buckets to see if it needs reorganization;
         return false;
     }
@@ -392,7 +572,7 @@ namespace storage
         //start spiffs
         int offset_x=0, offset_y=0;
         int x_positions[] = {70,360,660,960,1260};
-        int y_positions[] = {0,330,670,1010,1350,1695};
+        int y_positions[] = {0,346,680,1030,1350,1691};
 
         buckets[0] = Bucket({647,y_positions[5]});
         buckets[1] = Bucket({940,y_positions[5]});
@@ -409,7 +589,7 @@ namespace storage
         buckets[10] = Bucket({970,y_positions[2]});
         buckets[11] = Bucket({665,y_positions[2]});
         buckets[12] = Bucket({355,y_positions[2]});
-        buckets[13] = Bucket({55,y_positions[2]});
+        buckets[13] = Bucket({55,690});
         buckets[14] = Bucket({70,y_positions[1]});
         buckets[15] = Bucket({355,y_positions[1]});
         buckets[16] = Bucket({665,y_positions[1]});
@@ -420,7 +600,7 @@ namespace storage
         buckets[21] = Bucket({663,y_positions[0]});
         buckets[22] = Bucket({363,y_positions[0]});
         buckets[23] = Bucket({70,y_positions[0]});
-        interface_bucket = OutputBucket({40,1380});
+        interface_bucket = OutputBucket({30,1350});
 
         desserialize();
         mov_control.init();
@@ -447,13 +627,19 @@ namespace storage
         uint8_t id;
         int amount;
         int uses;
+        int pos;
 
         while(file.read(reinterpret_cast<char*>(rfid.data()),sizeof(rfid))
             && file.read(reinterpret_cast<char*>(&id),sizeof(id))
             && file.read(reinterpret_cast<char*>(&amount),sizeof(amount))
-            && file.read(reinterpret_cast<char*>(&uses),sizeof(uses)))
+            && file.read(reinterpret_cast<char*>(&uses),sizeof(uses))
+            && file.read(reinterpret_cast<char*>(&pos),sizeof(pos)))
         {
             bins.push_back(std::make_shared<Bin>(rfid,amount,id,uses));
+            if(pos<buckets.size())
+            {
+                buckets[pos].setBin(bins.back());
+            }
         }
     }
     void Storage::serialize()
@@ -466,11 +652,18 @@ namespace storage
             rfid_t rfid = b->getRFID();
             uint8_t id = b->getItemId();
             int amount = b->getAmount();
+            int i;
+            for(i =0; i<buckets.size();i++)
+            {
+                if(buckets[i].getBin() == b)
+                    break;
+            }
             int uses = b->getUses();
             file.write(reinterpret_cast<const char*>(rfid.data()),sizeof(rfid));
             file.write(reinterpret_cast<const char*>(&id),sizeof(id));
             file.write(reinterpret_cast<const char*>(&amount),sizeof(amount));
             file.write(reinterpret_cast<const char*>(&uses),sizeof(uses));
+            file.write(reinterpret_cast<const char*>(&i),sizeof(i));
         }
 
         
@@ -511,6 +704,12 @@ namespace storage
             json += ",";
             json += "\"uses\":";
             json += String(b->getUses());
+            json += ",";
+            json += "\"unit_weight\":";
+            json += String(Item::getWeight(b->getItemId()));
+            json += ",";
+            json += "\"weight\":";
+            json += String(b->getWeight());
             json += "}";
         }
 
@@ -541,6 +740,12 @@ namespace storage
                 json += ",";
                 json += "\"uses\":";
                 json += String(b->getUses());
+                json += ",";
+                json += "\"unit_weight\":";
+                json += String(Item::getWeight(b->getItemId()));
+                json += ",";
+                json += "\"weight\":";
+                json += String(b->getWeight());
                 json += "}";
             }
 

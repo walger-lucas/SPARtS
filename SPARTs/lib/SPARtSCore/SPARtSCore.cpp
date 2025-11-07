@@ -81,7 +81,7 @@ void SPARtSCore::run()
             xEventGroupClearBits(evg,0xff);
             xEventGroupWaitBits(evg,0x01,true,true,portMAX_DELAY);
         }
-
+        last_storage_status = storage::Storage::OK;
         setState(next_state);
         next_state = State::IDLE;
         break;
@@ -89,11 +89,13 @@ void SPARtSCore::run()
     case State::RETRIEVE_ITEM:
         printf("Retrieving item...\n");
         last_storage_status = storage.retrieve(rfid);
+        storage.mov_control.xy_table.calibrate();
         setState(State::IDLE);
         break;
     case State::STORE_ITEM:
         printf("Storing item...\n");
         last_storage_status = storage.store(change_id,item_id);
+        storage.mov_control.xy_table.calibrate();
         setState(State::IDLE);
         break;
     case State::READ_BUCKET:
@@ -112,13 +114,15 @@ void SPARtSCore::run()
         break;
     case State::REORGANIZE:
         printf("Reorganizing...\n");
-        last_storage_status = storage.reorganize();
+        last_storage_status = storage.reorganize(reweight);
         setState(State::IDLE);
         break;
 
     case State::AUTO_STORE:
         printf("Auto storing item...\n");
         auto_store_state();
+        if(getState() == State::IDLE)
+            storage.mov_control.xy_table.calibrate();
         break;
             
     case State::PROCESS_IMAGE:
@@ -154,14 +158,9 @@ storage::Storage::OperationStatus SPARtSCore::auto_store_state()
     }
     if(res.item_code == 0)
     {
-        if(conveyor.getPos()==controls::ConveyorControl::MAX_BIN-1)
-        {
-            current_state = State::IDLE;
-        } else 
-        {
-            current_state = State::AUTO_STORE;
-        }
-        conveyor.next();
+
+        current_state = State::IDLE;
+        conveyor.start();
         if(storage.needsReorganizing())
         {
             last_storage_status = storage::Storage::OK_NEEDS_REORGANIZING;
