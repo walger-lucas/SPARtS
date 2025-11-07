@@ -1,0 +1,23 @@
+@startuml SETUP
+title Setup State
+start
+: Start Actuators;
+: Calibrate Actuators;
+: Start bin system;
+: Desserialize system;
+: Remap bins;
+: Reorganize Bins;
+: Start Wifi;
+: Start Webserver;
+: Await configuration;
+note
+        Config
+        ----
+        "image_processing_uri" : "x.x.x.x:xxxx/image"
+        
+end note
+: Parse configuration;
+: Store configuration;
+
+end
+@enduml

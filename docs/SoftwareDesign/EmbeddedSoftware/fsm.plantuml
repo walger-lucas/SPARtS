@@ -1,0 +1,38 @@
+@startuml fsm
+[*] --> Setup
+Setup: StartWifi()
+Setup: StartServer()
+
+ Setup --> Reorg_Remap : SERVER_STARTED
+ Reorg_Remap --> WaitConnection : REMAPPED
+ WaitConnection --> Setup_EspCam : SETUP_MESSAGE_RECEIVED
+ Setup_EspCam --> AwaitCommand
+Setup_EspCam: SendConfEspCam()
+AwaitCommand ---> Remap : "/remap"
+AwaitCommand ---> Reorganize : "/reorganize"
+AwaitCommand <-- Remap
+AwaitCommand <--- Reorganize
+
+AwaitCommand: Entry / SendStatus()
+AwaitCommand: RcvCommand()
+
+
+
+AwaitCommand <-r- StorePiece
+AwaitCommand -[hidden]l-> StorePiece      
+AwaitCommand -l-> StorePiece : "/store_piece"
+
+StorePiece -u-> Setup_EspCam : EspCamError
+
+AwaitCommand <-r- Store
+AwaitCommand <-[hidden]r- Store
+AwaitCommand -r-> Store : "/store"
+
+
+AwaitCommand <--- Retrieve 
+AwaitCommand ---> Retrieve : "/retrieve?id=xx"
+AwaitCommand -> Read : "/"
+
+
+
+@enduml

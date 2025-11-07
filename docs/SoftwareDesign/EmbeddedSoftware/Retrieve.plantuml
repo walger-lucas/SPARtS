@@ -1,0 +1,52 @@
+@startuml Retrieve
+start
+group Retrieve Bin by RFID
+    :Check if Output Bucket (interface) is empty;
+    if (Not empty?) then (yes)
+        :Set Status (FINISHED, ERROR_OUTPUT_NOT_EMPTY);
+        :Return to AwaitCommand state;
+        stop
+    endif
+
+    :Locate bucket by RFID;
+    if (Bucket not found?) then (yes)
+        :Map storage layout;
+        :Try locating bucket again;
+        if (Still not found?) then (yes)
+            :Set Status (FINISHED, ERROR_BIN_NOT_FOUND);
+            :Return to AwaitCommand state;
+            stop
+        endif
+    else (found)
+        :Read bucket contents;
+        if (Bucket empty OR RFID mismatch?) then (yes)
+            :Remap storage layout;
+            :Try locating bucket again;
+            if (Not found?) then (yes)
+                :Set Status (FINISHED, ERROR_BIN_NOT_FOUND);
+                :Return to AwaitCommand state;
+                stop
+            endif
+        endif
+    endif
+end group
+
+group Transfer and Update
+    :Move bin from storage bucket to output bucket;
+    :Save current storage state (serialize);
+    if (Output bucket contains bin?) then (yes)
+        :Increment bin usage counter;
+    endif
+end group
+
+group Post-check
+    if (Reorganization needed?) then (yes)
+        :Set Status (FINISHED, OK_NEEDS_REORGANIZING);
+        :Return to AwaitCommand state;
+        stop
+    endif
+    :Set Status (FINISHED, OK);
+    :Return to AwaitCommand state;
+end group
+stop
+@enduml

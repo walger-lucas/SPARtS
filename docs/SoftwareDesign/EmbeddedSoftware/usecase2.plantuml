@@ -1,0 +1,28 @@
+@startuml
+left to right direction
+title Embedded Software Use Cases
+Actor Application
+
+usecase "UC1. Setup\nPOST /setup" as UC1
+usecase "UC2. Capture Image\nGET /capture_image" as UC2
+usecase "UC3. Retrieve Bin\nPOST /retrieve" as UC3
+usecase "UC4. Store Bin\nPOST /store" as UC4
+usecase "UC5. Read Bin Space\nPOST /read" as UC5
+usecase "UC6. Remap\nPOST /remap" as UC6
+usecase "UC7. Reorganize\nPOST /reorganize" as UC7
+usecase "UC8. Automatic Storage\nPOST /auto_store" as UC8
+usecase "UC9. Get Bins\nGET /bins" as UC9
+usecase "UC10. Poll Status\nGET /status" as UC10
+
+Application --> UC1
+Application --> UC2
+Application --> UC3
+Application --> UC4
+Application --> UC5
+Application --> UC6
+Application --> UC7
+Application --> UC8
+Application --> UC9
+Application --> UC10
+
+@enduml

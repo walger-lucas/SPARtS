@@ -1,5 +1,0 @@
-It has a 2 wire interface, receives 3.3v, and a simple connection.
-The current consumption should be lower than 20 mA.
-
-arduino library to comunicate with sensor.
-https://github.com/bogde/HX711

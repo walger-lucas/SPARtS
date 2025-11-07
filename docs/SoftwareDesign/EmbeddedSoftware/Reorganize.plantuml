@@ -1,0 +1,16 @@
+@startuml Reorganize
+start
+group Reorganize {
+ : Parse command;
+ note 
+"/reorganize"
+end note
+ if(!output_bucket.empty) then 
+    : Set Status (FINISHED,ERROR_OUTPUT_NOT_EMPTY);
+    : GOTO AwaitCommand State;
+    kill
+ endif
+ : reorganize_and_weight();
+: Set Status (FINISHED,OK);
+: GOTO AwaitCommand State;
+}

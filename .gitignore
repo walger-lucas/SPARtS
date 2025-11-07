@@ -1,5 +1,8 @@
 .vscode
 
+# Plantuml
+./out/
+
 # Prerequisites
 *.d
 
