@@ -23,7 +23,7 @@ class Item {
         return (id>=0 && id<max_item.size()) ? max_item[id] : max_item[0];
     }
 
-    static uint8_t getWeight(uint8_t id)
+    static float getWeight(uint8_t id)
     {
         return (id>=0 && id<max_item.size()) ? weight_per_item[id] : weight_per_item[0];
     }

@@ -90,8 +90,8 @@ namespace storage
         if(isEmpty())
             return 0;
         delay(1000);
-        hx711.wait_ready(200);
-        float weight = hx711.get_units(10)-BIN_WEIGHT;
+        hx711.wait_ready(1000);
+        float weight = hx711.get_units(20)-BIN_WEIGHT;
         float item_weight = Item::getWeight(type);
         if(weight<1.2f)
         {
@@ -503,6 +503,8 @@ namespace storage
             bu++;
             bi++;
         }
+        serialize();
+        mov_control.xy_table.calibrate();
         
         
         return OK;
@@ -576,13 +578,13 @@ namespace storage
 
         buckets[0] = Bucket({647,y_positions[5]});
         buckets[1] = Bucket({940,y_positions[5]});
-        buckets[2] = Bucket({1240,y_positions[5]});
-        buckets[3] = Bucket({1240,y_positions[4]});
+        buckets[2] = Bucket({1250,y_positions[5]});
+        buckets[3] = Bucket({1250,y_positions[4]});
         buckets[4] = Bucket({950,y_positions[4]});
         buckets[5] = Bucket({650,y_positions[4]});
         buckets[6] = Bucket({646,y_positions[3]});
         buckets[7] = Bucket({946,y_positions[3]});
-        buckets[8] = Bucket({1250,y_positions[3]});
+        buckets[8] = Bucket({1255,y_positions[3]});
 
 
         buckets[9] = Bucket({1270,y_positions[2]});

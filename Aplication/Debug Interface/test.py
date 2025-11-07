@@ -242,7 +242,7 @@ class ApiSparts:
         self.await_finish()
         return True
     def organize(self):
-        resp =requests.post(self.url+"/reorganize")
+        resp =requests.post(self.url+"/reorganize",json={"reweight":True})
         if resp.status_code!=200 :
             return False
         self.await_finish()
