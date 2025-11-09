@@ -48,6 +48,7 @@ export default class ApiSpartsClient {
           // set client state
           this.status = json.status;
           this.imageItemName = json.item_name ?? this.imageItemName;
+          console.log("returned status: "+this.status)
           return json;
         }
       } else {

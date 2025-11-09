@@ -33,58 +33,58 @@ const products = ref([
 ]);
 
 const SpartsOpCode = Object.freeze({
-  OK: { code: 0, message: "Operation completed successfully" },
-  FINISHED: { code: 1, message: "Process finished" },
-  OK_NEEDS_REORGANIZING: { code: 2, message: "Success, but bins need reorganizing" },
-  ERROR_OUTPUT_EMPTY: { code: 3, message: "Output bin is empty" },
-  ERROR_OUTPUT_NOT_EMPTY: { code: 4, message: "Output bin is not empty" },
-  ERROR_BIN_NOT_FOUND: { code: 5, message: "Bin not found" },
-  ERROR_FULL: { code: 6, message: "Storage is full" },
-  ERROR_CAM: { code: 7, message: "Camera error" },
-  ERROR_MIXED_ITEM: { code: 8, message: "Mixed items detected" },
+  OK: { code: "OK", message: "Operation completed successfully" },
+  FINISHED: { code: "FINISHED", message: "Process finished" },
+  OK_NEEDS_REORGANIZING: { code: "OK_NEEDS_REORGANIZING", message: "Success, but bins need reorganizing" },
+  ERROR_OUTPUT_EMPTY: { code: "ERROR_OUTPUT_EMPTY", message: "Output bin is empty" },
+  ERROR_OUTPUT_NOT_EMPTY: { code: "ERROR_OUTPUT_NOT_EMPTY", message: "Output bin is not empty" },
+  ERROR_BIN_NOT_FOUND: { code: "ERROR_BIN_NOT_FOUND", message: "Bin not found" },
+  ERROR_FULL: { code: "ERROR_FULL", message: "Storage is full" },
+  ERROR_CAM: { code: "ERROR_CAM", message: "Camera error" },
+  ERROR_MIXED_ITEM: { code: "ERROR_MIXED_ITEM" , message: "Mixed items detected" },
 });
 
 function showSuccess(msg) {
   toast.add({ severity: 'success', summary: 'Sucesso', detail: msg, life: 3000 })
 }
 function showError(msg) {
-  toast.add({ severity: 'danger', summary: 'Erro', detail: msg, life: 8000 })
+  toast.add({ severity: 'error', summary: 'Erro', detail: msg, life: 8000 })
 }
 function showInfo(msg) {
   toast.add({ severity: 'info', summary: 'Info', detail: msg, life: 8000 })
 }
 
 function processStatus(status){
+  console.log(status)
   switch (status) {
-    case SpartsOpCode.OK:
+    case SpartsOpCode.OK.code:
       showSuccess(SpartsOpCode.OK.message)
       break;
-    case SpartsOpCode.FINISHED:
+    case SpartsOpCode.FINISHED.code:
       showSuccess(SpartsOpCode.FINISHED.message)
       break;
-    case SpartsOpCode.ERROR_BIN_NOT_FOUND:
+    case SpartsOpCode.ERROR_BIN_NOT_FOUND.code:
       showError(SpartsOpCode.ERROR_BIN_NOT_FOUND.message)
       break;
-    case SpartsOpCode.ERROR_CAM:
+    case SpartsOpCode.ERROR_CAM.code:
       showError(SpartsOpCode.ERROR_CAM.message)
       break;
-    case SpartsOpCode.ERROR_FULL:
+    case SpartsOpCode.ERROR_FULL.code:
       showError(SpartsOpCode.ERROR_FULL.message)
       break;
-    case SpartsOpCode.ERROR_MIXED_ITEM:
+    case SpartsOpCode.ERROR_MIXED_ITEM.code:
       showError(SpartsOpCode.ERROR_MIXED_ITEM.message)
       break;
-    case SpartsOpCode.ERROR_OUTPUT_EMPTY:
+    case SpartsOpCode.ERROR_OUTPUT_EMPTY.code:
       showError(SpartsOpCode.ERROR_OUTPUT_EMPTY.message)
       break;
-    case SpartsOpCode.ERROR_OUTPUT_NOT_EMPTY:
+    case SpartsOpCode.ERROR_OUTPUT_NOT_EMPTY.code:
       showError(SpartsOpCode.ERROR_OUTPUT_NOT_EMPTY.message)
       break;
-    case SpartsOpCode.OK_NEEDS_REORGANIZING:
-      showError(SpartsOpCode.OK_NEEDS_REORGANIZING.message)
+    case SpartsOpCode.OK_NEEDS_REORGANIZING.code:
+      showInfo(SpartsOpCode.OK_NEEDS_REORGANIZING.message)
       break;
     default:
-      showInfo(SpartsOpCode.OK.message)
       break;
   }
 
@@ -232,6 +232,12 @@ async function read(id) {
   message.value = 'Fazendo read';
   showInfo("Reading Bucket")
   try {
+    if (id <= 0 || id > 24){
+      id = 255
+    }
+    else{
+      id -= 1
+    }
     const res = await sparts.read(id); // => resolve com {ok: true, status, itemName}
     currentStatus.value = res.status
     getBins()
@@ -316,7 +322,7 @@ async function searchItemHandler(){
         />
       </div>
     </Panel>
-    <Panel header="Read Bucket" class="mb-3">
+    <Panel header="Read Slot" class="mb-3">
       <div  class="grid justify-content-center align-items-center mt-3">
         <InputText
           class="col-1 mr-3"
@@ -327,14 +333,14 @@ async function searchItemHandler(){
         />
         <Button
           class="col-1"
-          label="Read Bucket"
+          label="Read Slot"
           :disabled="!connected || busy"
           @click="read(readBucket)"
         />
         
       </div>
       <div class="grid justify-content-center align-items-center mt-3">
-        <Span>Bucket Content: {{ bucketData }} </Span>
+        <Span>Slot Content: {{ bucketData }} </Span>
       </div>
     </Panel>
 
@@ -365,7 +371,8 @@ async function searchItemHandler(){
 
           <Column header="Image">
             <template #body="slotProps">
-              <img :src="`/images/${slotProps.item_name}.png`" class="w-24 rounded" />
+              <img :src="`/images/${slotProps.data.item_name}.png`" class="w-10 rounded" />
+              
             </template>
           </Column>
 

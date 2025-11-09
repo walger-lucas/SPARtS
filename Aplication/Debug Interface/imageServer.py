@@ -11,8 +11,10 @@ PORT = 9000
 IMAGE_DIR = "images"
 X = 1600
 Y = 1200
-PERCENT_X_INIT, PERCENT_X_FINAL = 0.3, 0,75
-PERCENT_Y_INIT, PERCENT_Y_FINAL = 0.25, 0,9
+PERCENT_X_INIT= 0.3 
+PERCENT_X_FINAL = 0.75
+PERCENT_Y_INIT = 0.25 
+PERCENT_Y_FINAL = 0.9
 
 
 class MLModel():
@@ -134,7 +136,7 @@ class MLModel():
 
         return response, annotated_img
     
-ml_model = MLModel(weights='mediumv3.pt', conf=0.79)
+ml_model = MLModel(weights='mediumv5.pt', conf=0.79)
 
 def next_filename():
     files = [f for f in os.listdir(IMAGE_DIR) if f.lower().endswith(".jpg")]
