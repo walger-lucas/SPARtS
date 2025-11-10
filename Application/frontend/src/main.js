@@ -26,6 +26,13 @@ const customTheme = definePreset(Aura,{
             900: '{red.900}',
             950: '{red.950}'
         }
+    },
+    components:{
+        panel:{
+            border:{
+                color: '#000000'
+            } 
+        }
     }
 })
 
