@@ -2,7 +2,7 @@
 import { Button, Column, InputText, ToggleSwitch, Select, SelectButton, Panel, useToast, Toast, Dialog } from 'primevue';
 import { ref } from 'vue';
 import ApiSpartsClient from '@/services/apiSparts';
-const connected = ref (true);
+const connected = ref (false);
 const dialogSearch = ref (false);
 const dialogInfo = ref(false)
 const changeStoreItem = ref (false);
@@ -439,7 +439,7 @@ async function searchItemHandler(){
 
           <Column header="Image">
             <template #body="slotProps">
-              <img :src="`/images/${slotProps.item_name}.png`" class="w-24 rounded" />
+              <img :src="`/images/${slotProps.data.item_name}.png`" class="w-10 rounded" />
             </template>
           </Column>
 
