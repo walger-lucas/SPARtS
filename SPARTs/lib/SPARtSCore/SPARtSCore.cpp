@@ -135,6 +135,8 @@ void SPARtSCore::run()
                 return;
             }
             last_object_sawn = res.item_code;
+            if(res.mixed)
+                last_object_sawn = 255;
             setState(State::IDLE);
             break;
             
@@ -218,7 +220,13 @@ storage::Storage::OperationStatus SPARtSCore::auto_store_state()
         }
         storage.interface_bucket.getBin()->setItemId(res.item_code);
     }
-    
+    if(conveyor.getPos()==controls::ConveyorControl::MAX_BIN-1)
+    {
+        current_state = State::IDLE;
+    } else 
+    {
+        current_state = State::AUTO_STORE;
+    }
     conveyor.next();
     using OperationStatus = storage::Storage::OperationStatus;
     delay(1000);
@@ -229,13 +237,7 @@ storage::Storage::OperationStatus SPARtSCore::auto_store_state()
         last_storage_status = opstat; 
         return opstat;
     }
-    if(conveyor.getPos()==controls::ConveyorControl::MAX_BIN-1)
-    {
-        current_state = State::IDLE;
-    } else 
-    {
-        current_state = State::AUTO_STORE;
-    }
+
     if(storage.needsReorganizing())
     {
         last_storage_status = storage::Storage::OK_NEEDS_REORGANIZING;

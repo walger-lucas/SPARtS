@@ -110,7 +110,10 @@ public:
         }
         json += ",";
         json += "\"item_name\":\"";
-        json += Item::getName(last_object_sawn);
+        if( last_object_sawn == 255)
+            json += "Mixed Items";
+        else
+            json += Item::getName(last_object_sawn);
         json += "\"";
         json += " }";
         return json;

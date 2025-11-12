@@ -576,33 +576,33 @@ namespace storage
         int x_positions[] = {70,360,660,960,1260};
         int y_positions[] = {0,346,680,1030,1350,1691};
 
-        buckets[0] = Bucket({647,y_positions[5]});
+        buckets[0] = Bucket({655,y_positions[5]});
         buckets[1] = Bucket({940,y_positions[5]});
         buckets[2] = Bucket({1250,y_positions[5]});
         buckets[3] = Bucket({1250,y_positions[4]});
-        buckets[4] = Bucket({950,y_positions[4]});
-        buckets[5] = Bucket({650,y_positions[4]});
-        buckets[6] = Bucket({646,y_positions[3]});
-        buckets[7] = Bucket({946,y_positions[3]});
-        buckets[8] = Bucket({1255,y_positions[3]});
+        buckets[4] = Bucket({955,y_positions[4]});
+        buckets[5] = Bucket({655,y_positions[4]});
+        buckets[6] = Bucket({655,y_positions[3]});
+        buckets[7] = Bucket({955,y_positions[3]});
+        buckets[8] = Bucket({1265,y_positions[3]});
 
 
         buckets[9] = Bucket({1270,y_positions[2]});
-        buckets[10] = Bucket({970,y_positions[2]});
-        buckets[11] = Bucket({665,y_positions[2]});
+        buckets[10] = Bucket({960,y_positions[2]});
+        buckets[11] = Bucket({658,y_positions[2]});
         buckets[12] = Bucket({355,y_positions[2]});
-        buckets[13] = Bucket({55,690});
+        buckets[13] = Bucket({65,690});
         buckets[14] = Bucket({70,y_positions[1]});
-        buckets[15] = Bucket({355,y_positions[1]});
-        buckets[16] = Bucket({665,y_positions[1]});
-        buckets[17] = Bucket({970,y_positions[1]});
-        buckets[18] = Bucket({1260,y_positions[1]});
+        buckets[15] = Bucket({360,y_positions[1]});
+        buckets[16] = Bucket({658,y_positions[1]});
+        buckets[17] = Bucket({960,y_positions[1]});
+        buckets[18] = Bucket({1255,y_positions[1]});
         buckets[19] =  Bucket({1270,y_positions[0]});
         buckets[20] = Bucket({970,y_positions[0]});
         buckets[21] = Bucket({663,y_positions[0]});
         buckets[22] = Bucket({363,y_positions[0]});
         buckets[23] = Bucket({70,y_positions[0]});
-        interface_bucket = OutputBucket({30,1350});
+        interface_bucket = OutputBucket({30,1345});
 
         desserialize();
         mov_control.init();
