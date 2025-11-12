@@ -158,7 +158,7 @@ async function map() {
     processStatus(currentStatus.value)
     getBins();
   } catch (err) {
-    message.value = `Erro: ${err?.message ?? String(err)}`;
+    // message.value = `Erro: ${err?.message ?? String(err)}`;
   } finally {
     busy.value = false;
   }
@@ -340,7 +340,7 @@ async function handlerHide() {
         <div class="grid justify-content-center mt-3">
           <Button class="col-8" label="Search item" @click="searchItemHandler" :disabled="!connected || busy"/>
         </div>
-        <Panel header="Get Slot Contend" class="mt-3">
+        <Panel header="Get Slot Content" class="mt-3">
           <div  class="grid justify-content-center align-items-center mt-3">
             <InputText
               class="col-4 mr-1"

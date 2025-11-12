@@ -12,7 +12,7 @@ export default class ApiSpartsClient {
     this.imageItemName = '';
     this.bins = [];
     this.pollInterval = opts.pollInterval ?? 2000; // ms
-    this.timeout = opts.timeout ?? 120000; // ms
+    this.timeout = opts.timeout ?? 1000000; // ms
   }
 
   // Internal helper: fetch with JSON and error handling
