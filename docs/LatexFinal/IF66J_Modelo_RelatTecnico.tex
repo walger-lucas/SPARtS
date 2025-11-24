@@ -1,18 +1,4 @@
-%===============================================================
-% Universidade Tecnol�gica Federal do Paran�
-% Departamento Acad�mico de Eletr�nica
-% Departamento Acad�mico de Inform�tica
-% Engenharia de Computa��o
-% Oficina de Integra��o 3 (IF66J)
-% Modelo e instru��es para a elabora��o dos
-% relat�rios t�cnicos da disciplina IF66J
-% Autores: Gustavo B. Borba e Guilherme A. Schneider
-% Vers�o: 27.fev.2016
-%===============================================================
 
-% Pre�mbulo
-
-% http://easylatek.blogs.sapo.pt/3034.html [---
 \documentclass[a4paper,11pt]{article}
 \usepackage[portuguese]{babel}
 % Para Windows
@@ -53,7 +39,7 @@
 
 % Cabe�alho e rodap� a partir da p�gina 2 [---
 % Substituir 'Modelo' pelo nome do projeto (nome de uma palavra usado na disciplina)
-\fancyhead[L]{\small{a}}
+\fancyhead[L]{\small{Technical Report - SPARtS}}
 \fancyhead[R]{\small\thepage} 
 \fancyfoot{}
 \renewcommand\headrulewidth{0.4pt}
@@ -62,8 +48,8 @@
 % T�tulo [---
 % Substituir 'Modelo...' pelo t�tulo do relat�rio
 \title{
-Relatório Técnico\\
-\textbf{Modelo e instru��es para a elabora��o dos relat�rios t�cnicos da disciplina IF66J}}
+Technical Report\\
+\textbf{SPARtS - Small Parts Automated Retrieval System}\\}
 % ---]
 
 % Autores [---
@@ -77,7 +63,7 @@ Otavio L. S. Pepe 4 \footnotesize{-- emailpessoaln@qqrlugar.com}\\
 % ---]
 
 % Substituir pelo mes e ano da defesa [---
-\date{Novembro de 2025}
+\date{November 2025}
 % ---]
 
 \begin{document}
@@ -86,11 +72,11 @@ Otavio L. S. Pepe 4 \footnotesize{-- emailpessoaln@qqrlugar.com}\\
 % N�o alterar
 \thisfancyput(35mm,-10mm){
 \begin{tabular}{c}
-Universidade Tecnológica Federal do Paraná -- \small{UTFPR}\\
-Departamento Acadêmico de Eletrônica -- \small{DAELN}\\
-Departamento Acadêmico de Informática -- \small{DAINF}\\
-Engenharia de Computaçãoo\\
-Oficina de Integração 3 (IF66J) -- S71 -- 2025/2 \\
+Federal University of Technology - Paraná - Brazil -- \small{UTFPR}\\
+Academic Department of Electronics -- \small{DAELN}\\
+Academic Department of Informatics -- \small{DAINF}\\
+Computer Engineering\\
+Integration Workshop 3 (ELEX22) -- S71 -- 2025/2 \\
 \\
 \hline
 \end{tabular}}
@@ -103,7 +89,7 @@ Oficina de Integração 3 (IF66J) -- S71 -- 2025/2 \\
 % Resumo [---
 % Sustituir pelo seu resumo
 \begin{abstract}
-\noindent O resumo deve ter entre 150 e 200 palavras. Apesar de breve, deve fornecer uma vis�o completa do trabalho. Por isso, � importante mencionar, pelo menos: a motiva��o para a realiza��o do trabalho, a abordagem para a solu��o do problema e os resultados obtidos. Recomenda-se redig�-lo somente ap�s finalizar todo o documento. Veja em \cite{Koopman97} uma descri��o mais detalhada do conte�do esperado em um bom resumo. Quanto � forma, utiliza-se um �nico par�grafo, acr�nimos apenas se realmente necess�rios e nenhuma refer�ncia bibliogr�fica. Logo, eu n�o poderia ter inclu�do aqui o \cite{Koopman97}, mas esse � o momento de apresent�-lo. Al�m disso, este resumo n�o � necessariamente um resumo, mas sim um breve guia para a elabora��o de um resumo. Se fosse um resumo, estaria apresentando o modelo. Por exemplo: \dots relat�rios t�cnicos s�o instrumentos importantes para a comunica��o de coisa e tal. Este documento apresenta um modelo para coisa e tal da disciplina Oficina de Integra��o 3. O editor de texto utilizado � o \LaTeX ~e a classe de documento adotada � a \textit{article}, recomendada para coisa e tal\dots. Al�m do t�tulo e autores, o resumo tamb�m costuma ser utilizado para a indexa��o do documento nas bases de dados. Portanto, � um recurso valioso para o leitor conhecer e julgar o seu trabalho.
+\noindent This report presents SPARtS, an automated storage and retrieval system designed to organize small parts in workshops and laboratories. The project addresses common challenges such as the time-consuming process of locating components, the high number of similar items, and the possibility of human error when storing parts. SPARtS integrates mechanical, hardware, and software components to automatically store and retrieve items through menu browsing, text search, or visual identification, and keep real-time stock estimates. The mechanical structure includes an XYZ movement system, a conveyor belt, a retractable platform, and 24-slot storage built with MDF, aluminum extrusions, and 3D-printed parts. The hardware architecture employs an ESP32 microcontroller, ESP32-CAM, load cell with HX711, RFID sensors, stepper motors, and custom-made circuitry. The software system combines a Vue.js frontend, a Python backend, and a YOLOv11-based computer vision model capable of identifying multiple item classes with high reliability. The system meets all functional requirements, demonstrating accurate positioning, reliable stock estimation, intuitive user interaction, and effective detection of item classes. With optimized workflow and precise automation, SPARtS proves to be a successful and efficient solution for improving organization and operational speed in workshop environments.
 \end{abstract}
 % ---]
 
@@ -111,464 +97,59 @@ Oficina de Integração 3 (IF66J) -- S71 -- 2025/2 \\
 % Corpo do texto [---
 % Substituir pelo seu relat�rio
 
-\section{Introdução}
+\section{Introduction}
 \label{sec:intro}
 
-%http://cs.brown.edu/about/system/software/latex/doc/fancybox.pdf
-\setlength{\fboxsep}{10pt}
-\begin{center}
-\fbox{
-\begin{minipage}{11.8cm}
-\begin{center}
-\LARGE\danger\\
-\smallskip
-\footnotesize{Leia todo este documento com aten��o. O texto n�o � apenas placeholder, h� instru��es e dicas importantes para a elabora��o do relat�rio t�cnico. Fa�a seu relat�rio a partir do arquivo \texttt{tex} deste modelo (abra o \texttt{tex}, fa�a um `Save as' e m�os � obra).}
-\end{center}
-\end{minipage}}
-\end{center}
-
-%http://cs.brown.edu/about/system/software/latex/doc/fancybox.pdf
-\setlength{\fboxsep}{10pt}
-\begin{center}
-\fbox{
-\begin{minipage}{11.8cm}
-\begin{center}
-\LARGE\danger\\
-\smallskip
-\footnotesize{Conte�dos obrigat�rios do relat�rio t�cnico: 1) figura com a vis�o geral do projeto; 2) requisitos (sugest�o: inserir ambos na se��o Introdu��o); 3) tabela com os custos do projeto (sugest�o: inserir na se��o Resultados).}
-\end{center}
-\end{minipage}}
-\end{center}
-
 \noindent
-Existem in�meras sugest�es de estruturas para a introdu��o. H� quem diga que n�o podem faltar o \textit{objetivo geral} e \emph{objetivos espec�ficos}, outros exigem uma subse��o \textit{metodologia}, outros subse��es para o \textit{problema} e \textit{justificativa}, e assim vai. Todos est�o certos. Mas, no final das contas, basta lembrar que a introdu��o deve abordar estes tr�s grandes aspectos do projeto: \textbf{o qu�}, \textbf{porqu�} e \textbf{como} \cite{Acorede09}. Isto � o necess�rio para a que a sua introdu��o seja suficientemente descritiva, pouco ``burocr�tica'' e sem sobreposi��o de conte�dos. Lembre-se tamb�m de mant�-la interessante e de leitura agrad�vel e que n�o � obrigat�rio criar subse��es.
+Workshops and laboratories frequently rely on a large variety of small parts for daily operations. However, storing, locating, and managing these components can become a time-consuming and error-prone task, especially when many similar items are involved. Human mistakes in placing items in incorrect locations, combined with the difficulty of maintaining an accurate inventory, highlight the need for a more efficient organizational solution.
 
-\section{Estrutura}
-\label{sec:estrut}
+To address these challenges, the SPARtS project proposes an automated system capable of storing, retrieving, organizing, and tracking small parts with minimal human intervention. The system integrates mechanical automation, embedded hardware, computer vision, and a user-friendly software interface to enable fast and reliable handling items. By combining an XYZ movement structure, a conveyor-based insertion mechanism, a load-cell-based stock estimation system, and YOLOv11-powered visual identification, SPARtS significantly improves operational efficiency in workshop environments.
 
-A estrutura tamb�m � chamada de `esqueleto' do relat�rio. Recomenda-se que a estrutura completa, ou uma estimativa dela, seja a primeira etapa do processo de elabora��o do relat�rio. Com excess�o da \textit{introdu��o} e da \textit{conclus�o}, n�o � obrigat�rio adotar a estrutura tradicional, que utiliza se��es chamadas de \textit{fundamenta��o te�rica} e \textit{desenvolvimento}. � claro que deve existir conte�do referente a isso, mas n�o necessariamente com estes nomes. O mesmo vale para a se��o \textit{resultados} (apesar de ser um pouco estranho um relat�rio t�cnico sem uma se��o \textit{resultados}). Veja, por exemplo, como os tr�s artigos a seguir foram organizados.\\
-\\
-\noindent
-\textit{Integrating hardware and software for the development of microcontroller-based systems} \cite{Dhaher01}, 12 p�ginas, citado 35 vezes \cite{GScholar14}. Se estivesse no formato deste modelo teria umas 26 p�ginas.
-\begin{compactenum}
-  \item Introduction
-  \item Laboratory facilities
-  \begin{compactenum}
-    \item Hardware
-    \item Software
-  \end{compactenum}
-  \item Course structure
-  \item Teaching laboratory
-  \begin{compactenum}
-    \item LAB 1: introduction to the development environment
-    \item LAB 2: structured assembly language programming
-    \item LAB 3: hardware interfacing
-    \item LAB 4: parallel I/O
-    \item LAB 5: interrupt and interrupt handling
-  \end{compactenum}
-  \item Project laboratories
-  \begin{compactenum}
-    \item Line tracking robot
-    \item Infrared communication project
-  \end{compactenum}
-  \item Student reactions and difficulties
-  \item Future expansion
-  \item Conclusion
-\end{compactenum}
-\vspace{\baselineskip} 
+This work presents the design, implementation, and evaluation of SPARtS, demonstrating how automation and intelligent processing can streamline inventory management and support more organized, accurate, and productive workflows.
 
-\noindent
-\textit{BCI2000: A general-purpose brain-computer interface (BCI) system} \cite{Schalk04}, 10 p�ginas, citado 1020 vezes \cite{GScholar14}. Se estivesse no formato deste modelo teria umas 22 p�ginas.
-\begin{compactenum}
-  \item Introduction
-  \begin{compactenum}
-    \item Brain-computer interface (BCI) technology
-    \item Further development of BCI technology
-  \end{compactenum}
-  \item BCI2000 system design
-  \begin{compactenum}
-    \item Essential features
-    \item Modules
-    \item System variables
-  \end{compactenum}
-  \item Initial implementations of BCI2000
-  \begin{compactenum}
-    \item Plataform
-    \item Modules
-  \end{compactenum}
-  \item Evaluation and validation of BCI2000
-  \begin{compactenum}
-    \item Real-time capabilities
-    \item Online performance
-  \end{compactenum}
-  \item Discussion
-  \begin{compactenum}
-    \item Summary
-    \item Benefits of BCI2000
-    \item Future development of BCI2000
-  \end{compactenum}
-  \item Availability of BCI2000 to other research groups
-  \item Future expansion
-  \item Conclusion
-\end{compactenum}
-\vspace{\baselineskip} 
+\subsection{Proposed Solution}
+\label{sec:solution}
 
-\noindent
-\textit{Towards fully autonomous driving: systems and algorithms} \cite{Levinson11}, 6 p�ginas, citado 75 vezes \cite{GScholar14}. Se estivesse no formato deste modelo teria umas 14 p�ginas.
-\begin{compactenum}
-  \item Introduction
-  \item System and vehicle
-  \begin{compactenum}
-    \item Hardware
-    \item Software
-  \end{compactenum}
-  \item Unsupervised laser calibration
-  \item Mapping and localization
-  \item Object recognition
-  \item Trajectory planning  
-  \item Dynamical modeling and control  
-  \item Traffic light detection  
-  \item Generic sign detection and direction-invariant stop sign classification
-  \item Conclusion
-\end{compactenum}
-\vspace{\baselineskip} 
+\section{Project Specification}
+\label{specification}
 
-Em \cite{CardiffFYPR11} h� boas sugest�es de estruturas e outras dicas para a elabora��o de um trabalho de conclus�o de curso (final year project). Apesar de tratar-se de um guia para a elabora��o de um relat�rio mais extenso, pode fornecer id�ias para voc� criar a estrutura mais adequada para este seu relat�rio t�cnico.\\
+\subsection{Requirements}
+\label{requirements}
 
-\section{Reda��o}
-\label{sec:redac}
+\subsection{Mechanical requirements}
+\label{mech_requirements}
 
-Um texto t�cnico-cient�fico deve ser objetivo, claro e preciso \cite{GenerosoPedagogia}. A seguir voc� encontra algumas dicas para a reda��o. No Ap�ndice 1 de \cite{Hartley08} tamb�m h� dicas interessantes.\\
+\subsection{hardware requirements}
+\label{hw_requirements}
 
-\begin{compactitem}
-\item Sempre releia o que acabou de escrever. Pergunte-se se outra pessoa conseguiria entender a id�ia a partir do que voc� escreveu.
-\item A concis�o � muito importante. Em \cite{GenerosoPedagogia} h� uma boa defini��o de um texto conciso: ``� aquele que transmite o m�ximo de informa��es com um m�nimo poss�vel de palavras sem preju�zo da compreens�o''.
-\item Prefira per�odos curtos (frases curtas). Per�odos longos, se n�o forem elaborados cuidadosamente, podem ficar truncados e comprometer a compreens�o. 
-\item Grandiloqu�ncia e rebuscamento n�o combinam com um texto t�cnico-cient�fico. A prioridade � transmitir a mensagem de maneira clara. Em \cite{GenerosoPedagogia} tem at� uma piada sobre isso: ``Desnecess�rio faz-se empregar estilo de escrita demasiadamente rebuscado, conforme deve ser do consentimento de V. S\textsuperscript{a}. Outrossim, tal pr�tica adv�m de esmero excessivo que beira o exibicionismo.''
-\item Em textos t�cnico-cient�ficos, recomenda-se o uso da terceira pessoa. Por exemplo, ao inv�s de escrever \textit{soldamos as pe�as}, prefira \textit{as pe�as foram soldadas}. Este � um t�pico pol�mico j� que � dificil negar que, muitas vezes, o uso da primeira pessoa deixa o texto mais agrad�vel. De qualquer forma, d� prefer�ncia para a impessoalidade.
-\item Conecte as id�ias. Reler o que acabou de escrever auxilia na cria��o de um texto com seq��ncia l�gica. Tamb�m, a seguinte dica de \cite{BlogPosgrad14} pode ajudar: ``Antes de iniciar, organize um roteiro com as id�ias e a ordem em que elas ser�o apresentadas. Estabele�a um plano l�gico para o texto. \textbf{S� escreve com clareza quem tem as id�ias claras na mente}''. Isso vale tamb�m para a estrutura de se��es (`esqueleto' do relat�rio).
-\item Apesar de n�o ser um texto para leigos, muitas vezes o leitor n�o possui o mesmo embasamento te�rico e t�cnico que voc�. Use o bom senso e a sua experi�ncia para decidir que pontos requerem descri��es mais detalhadas, e em quais deles descri��es superficiais s�o suficientes.
-\item Palavras estrangeiras provavelmente estar�o bastante presentes em um relat�rio t�cnico de engenharia. Embora muitas destas palavras j� estejam presentes no nosso dia-a-dia, na hora de coloc�-las no papel, especialmente em um texto formal, � necess�rio adotar o it�lico. Para saber se uma palavra est� incorporada ao portugu�s, fa�a uma busca no vocabul�rio ortogr�fico da l�ngua portuguesa da Academia Brasileira de Letras \cite{ABLconsulta}. No entanto, no nosso relat�rio t�cnico, podemos ser tolerantes. Por exemplo, software e hardware n�o precisam de it�lico. J� o termo \textit{thread}, acho que sim. Agora voc� deve ter pensado -- \textit{cacildis, que lamban�a!} N�o se desespere, independentemente da unanimidade ou n�o da necessidade do it�lico, o mais importante � manter a \textbf{consist�ncia} ao longo do texto. Ent�o, se � \textit{thread}, � \textit{thread} sempre. Se � thread, � thread sempre. Ainda, � poss�vel muitas vezes resolver essa pendenga simplesmente adotanto o termo em portugu�s, quando existir, mesmo que pare�a estranho. Por exemplo, ao inv�s de \textit{framework}, adotar \textit{arcabou�o}. S� pra ilustrar como esta quest�o gera diverg�ncias, a Secretaria de Comunica��o do Senado Federal, em suas normas internas, requisita que muitos estrangeirismos sejam grafados sem it�lico ou aspas \cite{SenadoSecom14}. 
-\end{compactitem}
+\subsection{Software requirements}
+\label{sw_requirements}
 
-\section{\LaTeX}
-\label{sec:latex}
+\section{Project Development}
+\label{development}
 
-Ao contr�rio da opini�o do coelhinho da Figura \ref{fig:bunnySuicides}, fazer no \LaTeX ~n�o � t�o desesperador assim. O \LaTeX ~s� quer o seu bem e vai te ajudar a preparar um documento caprichado. Para compilar o arquivo \texttt{tex} do modelo n�o � necess�rio qualquer complemento \texttt{sty}, \texttt{cls} ou \texttt{bib} externo. Use o editor de sua prefer�ncia. Para Windows, o mais difundido � o TeXnicCenter \cite{Texniccenter}. O TeXstudio \cite{Texstudio} parece ser interessante. O WinShell � mais simples \cite{Winshell}. Opini�o pessoal: acho o TeXnicCenter polu�do e j� vi bugs no TeXstudio. Sugiro o WinShell -- funciona bem, � f�cil de usar e d� conta do recado.
+\subsection{Mechanical development}
+\label{mech_development}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=10cm]{BunnySuicidesLatex.png}
-\caption{\small{O coelhinho que n�o queria usar \LaTeX. Adaptado de \cite{Riley03}.}}
-\label{fig:bunnySuicides}
-\end{figure}
+\subsection{Hardware development}
+\label{hw_development}
 
-Pra quem nunca usou o \LaTeX, a� vai um super-ultra-short guide para um Hello World.
+\subsection{Software development}
+\label{sw_development}
 
-\begin{description}
-\item[Passo 1.] Instale a distribui��o MiKTeX do \TeX/\LaTeX.
-  \begin{compactitem}
-    \item MiKTeX: \url{http://miktex.org} (Basic MiKTeX Installer)
-  \end{compactitem}
-\item[Passo 2.] Instale o editor WinShell.
-  \begin{compactitem}
-    \item WinShell: \url{http://www.winshell.de}
-  \end{compactitem}
-\item[Passo 3.] Abra o WinShell $\rightarrow$ menu File $\rightarrow$ New $\rightarrow$ TeX-Document. Insira o c�digo a seguir \cite{Unwalla06} e depois compile: menu Execute $\rightarrow$ LaTeX. Ser� gerado um pdf com o mesmo nome e no mesmo diret�rio do arquivo \texttt{tex}.
+\section{Results}
+\label{results}
 
-\begin{Verbatim}[xleftmargin=0mm]
-\documentclass{article}
-\begin{document}
-A \textbf{bold \textit{Hello \LaTeX}} to start!
-\end{document}
-\end{Verbatim}
-\end{description}
+\subsection{Budget}
+\label{budget}
 
-Fora isso, com um pouquinho de boa vontade e muito Google voc� fica craque em pouco tempo. A prop�sito \cite{Unwalla06}:
-\begin{compactitem}
-\item \LaTeX ~pronuncia-se `lay-tech' ou `lah-tech'.
-\item O \textit{Comprehensive TEX Archive Network} (CTAN), \url{http://www.ctan.org}, � o reposit�rio oficial de c�digo e documenta��o do \LaTeX.
-\item O livro mais recomendado � o \textit{The LaTeX Companion}, Frank Mittelbach e Michel Goossens,  2nd ed., 2004. Tem 1120 p�ginas!
-\item Para o primeiro contato, um material bastante recomendado � o \textit{The Not So Short Introduction to \LaTeX2e}, Tobias Oetiker, 2014. Dispon�vel em \url{http://www.ctan.org/tex-archive/info/lshort/english},
-\end{compactitem}
+\subsection{Fucntional requirements completion}
+\label{func_requirements_comp}
 
-\subsection{Editores online}
-\label{subsec:online}
+\section{Conclusion}
+\label{conclusion}
 
-Al�m dos editores mencionados, h� ainda os editores online. O maior benef�cio � a possibilidade de compartilhar o documento com outras pessoas, o que facilita bastante os trabalhos em equipe. J� ouvi boas recomenda��es do ShareLaTeX \cite{Sharelatex} e do Overleaf (antigo WriteLaTeX) \cite{Overleaf}. Mas alguns estudantes relataram problemas com a acentua��o no ShareLaTeX. Ent�o, recomendamos o Overleaf.
 
-\begin{compactitem}
-\item ShareLaTeX: \url{https://pt.sharelatex.com}
-\item Overleaf: \url{https://www.overleaf.com}
-\end{compactitem}
-
-Para transferir este modelo para o Overleaf, ap�s fazer o cadastro:
-
-\begin{description}
-\item[Passo 1.] Requisite um Upload zip (�cone ao lado de NEW PROJECT).
-\item[Passo 2.] Suba um zip contendo os arquivos necess�rios para o ~\LaTeX ~fazer a compila��o: arquivo \texttt{tex}, arquivos das figuras e arquivo \texttt{bib} com a bibliografia. Sugest�o: o \texttt{IF66J\_Modelo\_RelatTecnicoLaTeX.zip} j� est� organizado pra isso.
-\item[Passo 3.] Substitua \verb|\usepackage[latin1]{inputenc}| no pre�mbulo, por\\
-\verb|\usepackage[utf8]{inputenc}|.
-\item[Passo 4.] S� isso. Nem precisa pedir pra compilar porque o Overleaf gera previews (compila��es) automaticamente. � poss�vel alterar este comportamento do ambiente de Auto para Manual, ao lado da palavra Preview.
-\item[Passo 5.] Para baixar o pdf correspondente ao preview, clicar em PDF l� em cima.
-\end{description}
-
-\subsection{Gerenciando e chamando refer�ncias}
-\label{subsec:refs}
-
-Gerenciar e chamar as refer�ncias no \LaTeX ~� moleza. Para chamar uma refer�ncia basta usar o comando \verb|\cite{minhaRef}|, onde \texttt{minhaRef} � o label da refer�ncia. As refer�ncias ficam em um arquivo \texttt{bib}, que pode ser gerenciado a partir do pr�prio editor ou de aplicativos espec�ficos para isso. O JabRef \cite{Jabref} � um dos mais populares. 
-
-\begin{compactitem}
-\item JabRef: \url{http://jabref.sourceforge.net/}
-\end{compactitem}
-
-O comando \verb|\bibliography{meuArquivoBib}|, inserido no final do arquivo \texttt{tex}, antes do comando \verb|\end{document}|, realiza o link entre os arquivos \texttt{tex} e \texttt{bib}.
-
-Est�o dispon�veis diferentes estilos de formata��o da lista de refer�ncias e das chamadas. Neste modelo, vamos usar o estilo \texttt{unsrt} do \LaTeX ~\cite{Mori09}. O estilo � especificado utilizando-se o comando \verb|\bibliographystyle{unsrt}| antes do comando \verb|\bibliography|. Importante: no estilo \texttt{unsrt}, para inserir dados adicionais da refer�ncia, use o campo \texttt{note}.
-
-Exemplo:\\
-\\
-\noindent
-\verb|Uma estrutura de artigo cient�fico amplamente aceita � a IMRAD|\\
-\verb|(introduction, method, results and discussion) \cite{Hartley08}.|,\\
-resulta em:\\
-\noindent
-Uma estrutura de artigo cient�fico amplamente aceita � a IMRAD (introduction, method, results and discussion) \cite{Hartley08}.\\
-\\
-\noindent
-E, na se��o Refer�ncias, aparecem os dados da \texttt{Hartley08} que voc� inseriu no arquivo \texttt{bib}:\\
-\noindent
-\cite{Hartley08} ~~James Hartley. \textit{Academic Writing and Publishing: A Practical Handbook.}\\
-\hspace*{0.5cm} Taylor \& Francis, 2008.\\
-
-Muitas refer�ncias podem ser encontradas na web j� prontas para serem inseridas no arquivo \texttt{bib}. Para procur�-las, a palavra-chave � \textit{BibTeX}, que � o framework de gerenciamento de refer�ncias usado pelo \LaTeX. Tente, por exemplo, googlar \textit{``academic writing and publishing'' book bibtex}.
-
-\section{Figuras, tabelas e equa��es}
-\label{sec:fte}
-
-Aten��o para as regras a seguir.\\
-
-\begin{compactitem}
-\item Figuras e tabelas sempre devem ser chamadas a partir do texto. Para isso, utilize as palavras Figura/Figuras e Tabela/Tabelas com iniciais mai�sculas.
-\item O conte�do das figuras e tabelas deve ser bem explicado.
-\item Se a figura/tabela n�o � de sua autoria, cite a fonte ap�s o ponto final da legenda da seguinte forma: `Fonte: [refer�ncia]'. A refer�ncia deve constar na se��o Refer�ncias, como qualquer outra.
-\item Se a figura/tabela n�o � de sua autoria mas voc� a editou, cite a fonte ap�s o ponto final da legenda da seguinte forma: `Adaptado de [refer�ncia]'. A refer�ncia deve constar na se��o Refer�ncias, como qualquer outra.
-\item A legenda de uma figura fica abaixo da figura e a legenda de uma tabela fica acima da tabela.
-\item Jamais exagere no tamanho de uma figura, especialmente se a intens�o for estender o documento artificialmente. Isso n�o funciona! Qualquer leitor vai notar. Sem falar que compromete a est�tica e desperdi�a recursos. Uma estrat�gia para usar o espa�o de forma eficiente e est�tica � colocar v�rias figuras relacionadas em uma mesma \textbf{F}igura (`Figura $x$' do documento), na forma de um grid. Na Figura $x$, estas figuras s�o agora \textit{subfiguras} que podem ser indexadas por (a), (b) \ldots ($n$). Todas as subfiguras devem ser mencionadas na legenda e, de prefer�ncia, tamb�m no texto.
-\item Tabelas s�o abertas nas laterais, isto �, n�o possuem bordas externas esquerda e direita.
-\item Equa��es sempre devem ser chamadas do texto, mas n�o � obrigat�rio usar a palavra Equa��o/Equa��es. Na chamada de equa��es, tamb�m n�o � obrigat�rio usar o �ndice (n�mero identificador localizado � direita) da equa��o. Quando a equa��o for inserida diretamente no corpo do par�grafo, junto com o texto, esta equa��o n�o recebe um �ndice.
-\item Todos os elementos das equa��es (vari�veis) devem ser explicados. Uma vez que aparecem diretamente no corpo do par�grafo, junto com texto, devem estar em it�lico para serem facilmente discriminados.
-\item Equa��es que n�o s�o da sua autoria tamb�m devem ser referenciadas. A refer�ncia ([refer�ncia]) fica no texto, pr�xima da chamada da equa��o. Mas sempre vale o bom senso. Por exemplo, a equa��o da velocidade, $v = s/t$, onde $s$ � o espa�o e $t$ � o tempo, n�o precisa de refer�ncia. Observe que esta equa��o foi inserida diretamente no corpo do par�grafo, junto com o texto. Neste caso, ela n�o � identificada com um �ndice.
-\end{compactitem}
-\vspace{\baselineskip} 
-
-A seguir � apresentado um exemplo envolvendo equa��o, tabela e figura.\\
-
-\noindent
-``Na \textit{nota��o posicional}, um numeral inteiro de base $b$ qualquer pode ser convertido para a base $10$, conforme
-
-\begin{equation}\label{eq:posicional}
-S_{[10]} = \sum_{p=0}^{n}a_p b^p,
-\end{equation}
-
-\noindent
-onde $a$ � o algarismo e $p$ � a posi��o do algarismo dentro do numeral a ser convertido, sendo $p=0$ para o algarismo mais da direita, denominado \textit{menos significativo} (para as defini��es de n�mero, numeral e algarismo, veja \cite{JFPSilveira11}).''\\
-
-\noindent
-Outra op��o seria:\\
-
-``Na \textit{nota��o posicional}, um numeral inteiro de base $b$ qualquer pode ser convertido para a base $10$ conforme a Equa��o \ref{eq:posicional}, onde $a$ � o algarismo e $p$ � a posi��o do algarismo dentro do numeral a ser convertido. $p=0$ para o algarismo mais da direita, denominado\dots.''
-
-Para equa��es diretamente no corpo do par�grafo, junto com o texto, utilize o recurso de equa��es inline do \LaTeX. ~Uma das maneiras de se fazer isso � colocando a equa��o e/ou seus elementos dentro de \verb|$$|. Por exemplo:\\
-
-\noindent
-\verb|$y=x+c$, onde $c$ � uma constante|, resulta em:\\
-\noindent
-$y=x+c$, onde $c$ � uma constante.\\
-
-\noindent
-Continuando com o exemplo:\\
-
-\noindent
-``A Tabela \ref{tab:simbolos} apresenta os s�mbolos adotados em sistemas num�ricos de diferentes bases $b$. O sistema num�rico \textit{decimal} (base 10) tem sua origem no fato de possuirmos 10 dedos nas m�os. A Figura \ref{fig:bases} mostra exemplos de seres vivos que utilizam os sistemas num�ricos da Tabela \ref{tab:simbolos}. Observe que os golfinhos (Figura \ref{fig:bases}(d)) usam o sistema num�rico \textit{bin�rio}, o mesmo dos computadores.'' 
-
-\begin{table}[h]
-\caption{\small{S�mbolos adotados em sistemas num�ricos de diferentes bases $b$.}}
-\begin{center}
-\begin{tabular}{l|c|c}
-\hline
-$b$ & Nome & S�mbolos \\
-\hline
-10 & decimal & 0,1,2,3,4,5,6,7,8,9 \\
-8 & octal & 0,1,2,3,4,5,6,7  \\
-4 & quatern�rio & 0,1,2,3 \\
-2 & bin�rio & 0,1 \\
-\hline
-\end{tabular}
-\end{center}
-\label{tab:simbolos}
-\end{table}
-
-\begin{figure}[h]
-\centering
-\begin{tabular}{cccc}
-  \includegraphics[width=2.8cm]{SistNumSeres_base10_3.png} &
-  \includegraphics[width=2.8cm]{SistNumSeres_base8_3.png} &
-  \includegraphics[width=2.8cm]{SistNumSeres_base4_3.png} &
-  \includegraphics[width=2.8cm]{SistNumSeres_base2_3.png} \\
- (a) & (b) & (c) & (d)
-\end{tabular}
-\caption{\small{Exemplos de seres vivos que utilizam sistemas num�ricos de diferentes bases. (a) humanos: base 10, (b) Simpsons: base 8, (c) caranguejos: base 4 e (d) golfinhos: base 2.}}
-\label{fig:bases}
-\end{figure}
-
-N�o tente brigar com o \LaTeX ~para posicionar as figuras e tabelas onde voc� acha melhor, deixe que ele distribua e relaxe. As chamadas s�o feitas facilmente utilizando-se os comandos \verb|\label{meuLabel}| dentro do ambiente da figura, tabela ou equa��o e \verb|\ref{meuLabel}| no texto. N�o altere o tamanho (\verb|\small|) da fonte das legendas do modelo \texttt{tex}. 
-
-Tabelas mais sofisticadas podem �s vezes ser um pouco chatas de se fazer no \LaTeX, ~mas depois de pegar o jeito fica f�cil. A Tabela \ref{tab:titulos} apresenta o n�mero de t�tulos em diferentes campeonatos de times de futebol do Cazaquist�o \footnote{Claro que a tabela � fake. Isto � uma nota de rodap�, obtida com o comando \texttt{\textbackslash footnote\{Meu texto aqui.\}} } . Observe que ela utiliza o recurso de `mesclar c�lulas' (termo usado pelo editor MS Word), obtido no \LaTeX ~a partir dos comandos \verb|\multirow| ~e \verb|\multicolumn|.
-
-\begin{table}[h]
-\caption{\small{N�mero de t�tulos em campeonatos nacionais e internacionais dos times mais populares do Cazaquist�o.}}
-\begin{center}
-\begin{tabular}{l|l|c|c|c|c}
-\hline
-\multirow{2}{*}{Divis�o} & \multirow{2}{*}{Time} & \multicolumn{2}{c|}{Camp. Nacional} & \multicolumn{2}{c}{Camp. Internacional}\\
-\cline{3-6}
-{} & {} & Copa do Rei & Brasileir�o & Libertadores & Champions\\
-\hhline{======}
-\multirow{2}{*}{$1^a$}   & �guias & 12 & 2 & 0 & 0 \\
-                         & KZAQs & 7 & 1 & 1 & 0 \\
-\hline
-$2^a$ & Powers & $\pi$ & $\sqrt{2}$ & 0 & 1 \\
-\hline                         
-\end{tabular}
-\end{center}
-\label{tab:titulos}
-\end{table}
-
-\section{Professor, quantas p�ginas?}
-\label{sec:npaginas}
-
-S� pra ter uma refer�ncia, vamos considerar os padr�es de algumas revistas cient�ficas, que estabelecem um m�nimo de 3000 ou de 5000 palavras para o corpo do texto, dependendo do tipo de artigo. Se adot�ssemos as normas para elabora��o trabalhos acad�micos da UTFPR \cite{UTFnormas08} -- fonte Times 12 pt, espa�amento 1,5, margens esquerda e superior de 3 cm, margens direita e inferior de 2 cm -- 3000 palavras ocupariam umas 7 p�ginas e 5000 palavras ocupariam umas 12 p�ginas. Apesar de parecer mais compacto, no nosso modelo os n�meros de p�ginas seriam os mesmos (observe que, apesar da fonte 11 pt e espa�amento simples, as margens s�o grandes). Como ainda existem os elementos pr�-textuais, refer�ncias, figuras e os espa�amentos entre as se��es, o n�mero de p�ginas certamente aumenta. Vamos considerar, por exemplo, que um relat�rio de 3000 palavras ocupe ent�o 10 p�ginas. Esta � uma faixa de n�meros de palavras e p�ginas compat�vel com o que esperamos para a disciplina. Outro dado interessante com rela��o � extens�o deste tipo de documento pode ser encontrado em \cite{CardiffFYPR11}, que estabelece um limite de 15000 palavras para o corpo do texto de um relat�rio de trabalho de conclus�o de curso. Com base em tudo isso, vamos ent�o estabelecer as regras para o relat�rio t�cnico da IF66J:
-
-\begin{compactitem}
-\item M�nimo de 3500 e m�ximo de 6000 palavras, contadas a partir do arquivo pdf, utilizando uma das ferramentas a seguir.
-  \begin{compactitem}
-    \item Translator's Abacus (free):\\
-		\url{http://www.globalrendering.com/download.html}
-    \item WordCounter online word counter:\\
-		\url{http://www.docwordcounter.com/}
-    \item Count On It online word counter:\\
-		\url{http://felix-cat.com/tools/wordcount/} (talvez pdf limitado em 1 MB)
-  \end{compactitem}
-N�o � poss�vel afirmar que estas ferramentas apresentam contagens exatas, mas � o suficiente para as nossas necessidades. Ainda, as contagens de cada ferramenta n�o s�o id�nticas. Este pdf por exemplo, segundo o Translator's Abacus possui 4534 palavras e segundo o WordCounter, 4433 palavras.  Adote aquela da sua prefer�ncia ou, se for necess�rio, aquela que resulta em uma contagem mais conveniente para a sua situa��o.
-\item M�nimo de 10 e m�ximo de 15 p�ginas.
-\item M�nimo de 4 figuras. 
-\item M�nimo de 10 refer�ncias.
- \end{compactitem}
- 
-\section{Antes de enviar para os professores}
-\label{sec:enviar}
- 
-N�o envie para os professores da disciplina um relat�rio inacabado, ou em outras palavras, mal feito. Certamente voc� tem experi�ncia e bom senso pra saber quando o documento est� decente e adequado para ser apresentado aos professores. Sabemos que voc� sabe, mas n�o custa refor�ar que \textbf{o trabalho � da equipe}. Os professores requisitar�o corre��es e melhorias, mas n�o tem superpoderes para transformar um relat�rio muito ruim em bom.
-
-Assim, � importante sempre fazer revis�es. No Ap�ndice 2 de \cite{Hartley08} h� um excelente guia para a revis�o detalhada de um texto t�cnico-cient�fico (conte�do e estrutura). Outra abordagem que pode auxiliar na melhoria do texto � uma autoavalia��o segundo crit�rios bem espec�ficos. Veja a seguir alguns crit�rios utilizados pelos revisores (peer review) dos artigos cient�ficos de dois congressos diferentes. Observe que estes crit�rios poderiam ser aplicados tamb�m na avalia��o de um relat�rio t�cnico.
-
-\subsection{Conjunto de crit�rios \#1}
-\label{subsec:peerrev1}
-
-\begin{compactenum}
-  \item Technical soundness (Are the ideas developed in a correct way?)
-  \begin{compactenum}
-    \item Completely correct
-    \item Probably correct (some minor points not clear)
-    \item Has only minor errors
-    \item Not enough details to judge
-    \item Has major errors (please justify)
-  \end{compactenum}
-    \item Presentation (Is the paper well written? Is it clear, well organized?)
-  \begin{compactenum}
-    \item Excellent, paper is clear and well written
-    \item Very good, but it can be improved is small points
-    \item Good, but has minor errors in writing and/or figures
-    \item Weak, with lots of minor errors in writing and/or figures
-    \item Unreadable (please justify)
-  \end{compactenum}
-    \item Overall recommendation (How do you classify this paper in a single grade?)
-  \begin{compactenum}
-    \item Accept for Oral Presentation
-    \item Accept for Poster Presentation
-    \item Reject
-  \end{compactenum}
-\end{compactenum}
-
-\subsection{Conjunto de crit�rios \#2}
-\label{subsec:peerrev2}
- 
- \begin{compactenum}
-  \item Overall evaluation
-  \begin{compactenum}
-    \item strong accept
-    \item accept
-    \item weak accept
-    \item borderline paper
-    \item weak reject
-    \item reject
-    \item strong reject
-  \end{compactenum}
-Para todos os crit�rios a seguir, as pontua��es s�o: 
-  \begin{compactenum}  
-    \item excellent
-    \item good
-    \item fair
-    \item poor
-    \item very poor
-  \end{compactenum}
-  \item Technical Content -- Scientific relevance/importance (research or engineering)
-  \item Technical Content -- Methodology
-  \item Technical Content -- Results and data analysis
-  \item Technical Content -- Discussion and conclusion
-  \item Technical Content -- Technical soundness/plausibility
-  \item Presentation -- Clarity of problem statement and objective
-  \item Presentation -- Quality and size of illustrations 
-  \item Presentation -- Clarity of writing, standard of language
-  \item Presentation -- References (number and quality)
-  \item Presentation -- Title concise and  informative
-  \item Presentation -- Abstract (objective, scope, results)
-  \item Presentation -- Adequate length
-  \item General -- Overall quality rating
-\end{compactenum}
- 
- \section{Sugest�es para os professores}
- \label{sec:sugestoes}
- 
-Por favor, fique � vontade para fazer sugest�es para o aperfei�oamento de qualquer aspecto deste modelo, em qualquer momento. Coment�rios pertinentes ser�o sempre bem vindos. Valorizamos sinceramente o seu retorno e interesse em contribuir.
- 
-\section{Conclus�o}
-\label{sec:conc}
-
-Outros nomes poss�veis para esta se��o s�o \textit{Considera��es finais} ou \textit{Conclus�es} (no plural). Deve apresentar um panorama geral do projeto com �nfase no que foi atingido, mencionando-se os principais objetivos, seus resultados e o que foi aprendido \cite{CardiffFYPR11}. Seja objetivo e mantenha o foco nos aspectos t�cnicos, de prefer�ncia incluindo dados quantitativos. Costuma-se tamb�m apresentar sugest�es de \textit{trabalhos futuros}, isto �, o que pode ser feito para a continuidade do projeto.
-
-O relat�rio ser� avaliado pelos professores da disciplina e por uma banca e conta pontos importantes. Lembre que a banca n�o acompanhou a execu��o do projeto. Na maioria dos casos, � por meio do relat�rio que acontece o primeiro contato dos julgadores com o seu trabalho. Portanto, � essencial deixar uma boa impress�o e valorizar o seu projeto. Um bom trabalho pode facilmente ser ofuscado por um relat�rio pobre ou descuidado.
-
-A vers�o final deste documento permanecer� � disposi��o das pessoas. � exclusivamente atrav�s dele que o seu trabalho ser� julgado por aqueles que n�o viram o prot�tipo ou n�o acompanharam a defesa. O objetivo � que o relat�rio sirva como uma fonte de pesquisa, refer�ncia ou inspira��o para pessoas interessadas na �rea do seu projeto, ou at� mesmo em reproduz�-lo ou aperfei�o�-lo.
-
-Por fim, tenha em mente que a prioridade � a qualidade do relat�rio e n�o a sua extens�o, isto �, qualidade e n�o quantidade. Ao mesmo tempo, n�o deve ser muito curto, comprometendo a \textbf{completude}. Bom senso sempre e bom trabalho!
- 
-\setlength{\fboxsep}{10pt}
-\begin{center}
-\fbox{
-\begin{minipage}{11.8cm}
-\begin{center}
-\LARGE\danger\\
-\smallskip
-\footnotesize{Este modelo foi redigido em uma linguagem muitas vezes informal, o seu relat�rio deve ser formal. Neste modelo n�o houve preocupa��o em usar o it�lico para termos estrangeiros, no seu relat�rio deve haver.}
-\end{center}
-\end{minipage}}
-\end{center}
- 
-\section*{Agradecimentos}
- 
-Esta se��o � opcional. Mencione colegas, parentes, professores, fornecedores, chineses `craqueadores' de softwares ou quaisquer outras pessoas/entidades, humanas ou n�o, a quem voc� queira manifestar sua gratid�o. Observe que esta se��o n�o � numerada (comando \verb|\section*{Agradecimentos}|).
 
 %Insere referencias [---
 \bibliographystyle{unsrt}
