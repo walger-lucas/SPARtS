@@ -1,0 +1,123 @@
+\begin{thebibliography}{10}
+
+\bibitem{Koopman97}
+Philip Koopman.
+\newblock How to write an abstract, 1997.
+\newblock \url{http://users.ece.cmu.edu/~koopman/essays/abstract.html}.
+
+\bibitem{Acorede09}
+Mudathir~Funsho Akorede.
+\newblock Guidelines for writing an undergraduate engineering project.
+\newblock {\em IEEE Potentials}, 28(6), 2009.
+
+\bibitem{Dhaher01}
+A.H.G Al-Dhaher.
+\newblock Integrating hardware and software for the development of
+  microcontroller-based systems.
+\newblock {\em Microprocessors and Microsystems}, 25(7):317 -- 328, 2001.
+
+\bibitem{GScholar14}
+Google Scholar.
+\newblock \url{scholar.google.com}.
+
+\bibitem{Schalk04}
+{Gerwin Schalk et al.}
+\newblock Bci2000: a general-purpose brain-computer interface {(BCI)} system.
+\newblock {\em IEEE Trans Biomed Eng}, 51:1034--43, 2004.
+
+\bibitem{Levinson11}
+{J. Levinson et al.}
+\newblock Towards fully autonomous driving: Systems and algorithms.
+\newblock In {\em IEEE 2011 Intelligent Vehicles Symposium (IV)}, pages
+  163--168, June 2011.
+
+\bibitem{CardiffFYPR11}
+{Cardiff University -- School of Computer Science and Informatics}.
+\newblock A short guide to writing your final year project or {MSc}
+  dissertation, 2011.
+\newblock Download:
+  \url{https://www.cs.cf.ac.uk/PATS2/wiki/lib/exe/fetch.php?media=project-report.pdf}.
+
+\bibitem{GenerosoPedagogia}
+Rui~Alexandre Generoso.
+\newblock Estrutura e redação de um texto técnico-científico.
+\newblock Download:
+  \url{http://www.ruyalexandre.hol.es/arquivos/pedtextocientifico.pdf}.
+
+\bibitem{Hartley08}
+James Hartley.
+\newblock {\em Academic Writing and Publishing: A Practical Handbook}.
+\newblock Taylor \& Francis, 2008.
+
+\bibitem{BlogPosgrad14}
+Blog Pós-Graduando.
+\newblock Dez erros comuns na redação científica, 2010.
+\newblock
+  \url{http://posgraduando.com/blog/dez-erros-comuns-na-redacao-cientifica}.
+
+\bibitem{ABLconsulta}
+{Academia Brasileira de Letras -- Busca no vocabulário}.
+\newblock
+  \url{http://www.academia.org.br/abl/cgi/cgilua.exe/sys/start.htm?sid=23}.
+
+\bibitem{SenadoSecom14}
+Senado Federal.
+\newblock Manual de comunicação da {Secom}.
+\newblock
+  \url{http://www12.senado.gov.br/manualdecomunicacao/redacao-e-estilo/estilo/estrangeirismos-grafados-sem-italico}.
+
+\bibitem{Texniccenter}
+TeXnicCenter integrated documentation environment (IDE)~for LaTeX.
+\newblock \url{www.texniccenter.org/}.
+
+\bibitem{Texstudio}
+TeXstudio integrated writing environment for~creating LaTeX~documents.
+\newblock \url{http://texstudio.sourceforge.net/}.
+
+\bibitem{Winshell}
+WinShell~LaTeX user~front end.
+\newblock \url{http://www.winshell.de/}.
+
+\bibitem{Riley03}
+Andy Riley.
+\newblock {\em The Book of Bunny Suicides}.
+\newblock Plume, 2003.
+
+\bibitem{Unwalla06}
+Mike Unwalla.
+\newblock {LaTeX}: an introduction.
+\newblock {\em Communicator}, Spring 2006.
+\newblock Download:
+  \url{http://www.techscribe.co.uk/ta/latex-introduction.pdf}.
+
+\bibitem{Sharelatex}
+{ShareLatex -- The easy to use, online, collaborative LaTeX editor}.
+\newblock \url{https://sharelatex.com/}.
+
+\bibitem{Overleaf}
+Overleaf collaborative writing and publishing.
+\newblock \url{https://www.overleaf.com/}.
+
+\bibitem{Jabref}
+JabRef open source bibliography~reference manager.
+\newblock \url{http://jabref.sourceforge.net/}.
+
+\bibitem{Mori09}
+Lapo~F. Mori.
+\newblock Managing bibliographies with {LaTeX}.
+\newblock {\em TUGboat}, 30(1):36--48, 2009.
+\newblock Download: \url{https://www.tug.org/TUGboat/tb30-1/tb94mori.pdf}.
+
+\bibitem{JFPSilveira11}
+J.F.~Porto da~Silveira.
+\newblock Três noções numéricas básicas: número, numeral e algarismo, 2001.
+\newblock \url{http://www.mat.ufrgs.br/~portosil/passa7a.html}.
+
+\bibitem{UTFnormas08}
+{Universidade Tecnológica Federal do Paraná (UTFPR) -- Comissão de Normalização
+  de Trabalhos Acadêmicos}.
+\newblock Normas para elaboração de trabalhos acadêmicos, 2008.
+\newblock Download:
+  \url{http://www.utfpr.edu.br/dibib/normas-para-elaboracao-de-trabalhos-academicos/normas_trabalhos_utfpr.pdf}.
+
+\end{thebibliography}
