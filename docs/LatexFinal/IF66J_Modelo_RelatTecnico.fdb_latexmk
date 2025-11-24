@@ -1,14 +1,14 @@
 # Fdb version 3
-["bibtex IF66J_Modelo_RelatTecnico"] 1763991182 "IF66J_Modelo_RelatTecnico.aux" "IF66J_Modelo_RelatTecnico.bbl" "IF66J_Modelo_RelatTecnico" 1763991183
+["bibtex IF66J_Modelo_RelatTecnico"] 1763992590 "IF66J_Modelo_RelatTecnico.aux" "IF66J_Modelo_RelatTecnico.bbl" "IF66J_Modelo_RelatTecnico" 1763992747
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/unsrt.bst" 1292289607 18030 1376b4b231b50c66211e47e42eda2875 ""
-  "IF66J_Modelo_RelatTecnico.aux" 1763991182 3698 b3c1ae4744086df14f9a76d69c5d457a "pdflatex"
-  "IF66J_v1.bib" 1428274868 12914 7d3a46315c96bfd72c3c5fcaca0c919f ""
+  "IF66J_Modelo_RelatTecnico.aux" 1763992747 3698 b3c1ae4744086df14f9a76d69c5d457a "pdflatex"
+  "IF66J_v1.bib" 1763992408 13284 a2a6d8f15d4575cb99d11437974d2613 ""
   (generated)
   "IF66J_Modelo_RelatTecnico.bbl"
   "IF66J_Modelo_RelatTecnico.blg"
-["pdflatex"] 1763991182 "/home/ian/Faculdade/8semestre/SPARtS/docs/LatexFinal/IF66J_Modelo_RelatTecnico.tex" "IF66J_Modelo_RelatTecnico.pdf" "IF66J_Modelo_RelatTecnico" 1763991183
+["pdflatex"] 1763992746 "/home/ian/Faculdade/8semestre/SPARtS/docs/LatexFinal/IF66J_Modelo_RelatTecnico.tex" "IF66J_Modelo_RelatTecnico.pdf" "IF66J_Modelo_RelatTecnico" 1763992747
   "/etc/texmf/web2c/texmf.cnf" 1742007940 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/ian/Faculdade/8semestre/SPARtS/docs/LatexFinal/IF66J_Modelo_RelatTecnico.tex" 1763991170 6523 49cfb4dca196ed5c2998b4502a917d61 ""
+  "/home/ian/Faculdade/8semestre/SPARtS/docs/LatexFinal/IF66J_Modelo_RelatTecnico.tex" 1763992746 6645 1cb14ad8a2484905347b5afe9ff96dd6 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
@@ -101,10 +101,10 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1744587842 4379155 98693266ff65f58d9f98aff394de12d2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1744587869 2801029 52c101a2af9f71ba0083f96535a442bd ""
-  "IF66J_Modelo_RelatTecnico.aux" 1763991182 3698 b3c1ae4744086df14f9a76d69c5d457a "pdflatex"
-  "IF66J_Modelo_RelatTecnico.bbl" 1763991182 49 0eba253fc001332e731e8aba3f23127b "bibtex IF66J_Modelo_RelatTecnico"
-  "IF66J_Modelo_RelatTecnico.out" 1763991182 2149 b1a62c0f6943925b24433b9b9b46a00a "pdflatex"
-  "IF66J_Modelo_RelatTecnico.tex" 1763991170 6523 49cfb4dca196ed5c2998b4502a917d61 ""
+  "IF66J_Modelo_RelatTecnico.aux" 1763992747 3698 b3c1ae4744086df14f9a76d69c5d457a "pdflatex"
+  "IF66J_Modelo_RelatTecnico.bbl" 1763992591 49 0eba253fc001332e731e8aba3f23127b "bibtex IF66J_Modelo_RelatTecnico"
+  "IF66J_Modelo_RelatTecnico.out" 1763992747 2149 b1a62c0f6943925b24433b9b9b46a00a "pdflatex"
+  "IF66J_Modelo_RelatTecnico.tex" 1763992746 6645 1cb14ad8a2484905347b5afe9ff96dd6 ""
   (generated)
   "IF66J_Modelo_RelatTecnico.aux"
   "IF66J_Modelo_RelatTecnico.log"
