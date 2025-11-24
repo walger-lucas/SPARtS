@@ -66,3 +66,15 @@ Aplication/Debug Interface/images/
 *.o
 *.d
 #ESPCAM - END=======================================================
+
+# LATEX - BEGIN=====================================================
+# Ignore LaTeX intermediate and output files
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.gz
