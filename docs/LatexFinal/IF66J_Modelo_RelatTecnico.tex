@@ -21,6 +21,8 @@
 \usepackage{fourier} %symbols
 \usepackage{ifsym} %symbols
 \usepackage{graphicx} %para inserir jpg e png e pdf
+\usepackage{float}
+\usepackage{longtable}
 % ---]
 
 % Cria hyperlinks e estrutura de t�picos para navegar em um pdf reader [---
@@ -48,7 +50,7 @@
 % Substituir 'Modelo...' pelo t�tulo do relat�rio
 \title{
 Technical Report\\
-\textbf{SPARtS - Small Parts Automated Retrieval System}\\}
+\textbf{SPARtS - Small Parts Automated Retrieval and Storage}\\}
 % ---]
 
 % Autores [---
@@ -106,26 +108,91 @@ To address these challenges, the SPARtS project proposes an automated system cap
 
 This work presents the design, implementation, and evaluation of SPARtS, demonstrating how automation and intelligent processing can streamline inventory management and support more organized, accurate, and productive workflows.
 
-\subsection{Proposed Solution}
-\label{sec:solution}
-
-\noindent
-In order to solve the problems presented in section \ref{sec:intro}, SPARtS follow the following sequence. 
-
 \section{Project Specification}
 \label{specification}
 
 \subsection{Requirements}
 \label{requirements}
 
+This section presents the main requirements established by the SPARtS project team during the planning phase, taking into account the available resources and the intended system functionalities. The requirements were divided into functional and non-functional categories and organized according to the system’s subsystems: software, mechanical, and hardware.
+
 \subsection{Mechanical Requirements}
 \label{mech_requirements}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|p{8cm}|}
+\hline
+Category & Requirement ID & Description \\ \hline
+
+Mechanical & FR01  &  The system must store up to 24 storage bins each with a maximum of 100 grams of parts, for parts with minimum individual weight of 2 grams and maximum individual dimension in any direction of 30 mm \\ \hline
+
+Mechanical & FR02  & The system must deliver a retrieved storage bin in a output compartment \\ \hline
+
+Mechanical & FR03  &  The system must fetch and move bins across all storage areas and the user output area\\ \hline
+
+Mechanical & FR04  & The system must have a mechanism for automated storage of parts separated in buffer bins\\ \hline
+
+Mechanical & FR05  & The system must allow user manual access to the bins \\ \hline
+
+\end{tabular}
+\caption{Mechanical Requirements}
+\end{table}
 
 \subsection{Hardware Requirements}
 \label{hw_requirements}
 
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|p{8cm}|}
+\hline
+Category & Requirement ID & Description \\ \hline
+
+Hardware & FR06  &  The system must be able to verify the ID of a bin with an individual ID tag \\ \hline
+
+Hardware & FR07  & The system must capture images of items in a buffer bin \\ \hline
+
+Hardware & FR08  &  The system must estimate stock by measuring the weight of a storage bin in the output compartment with a margin of error of +-3 grams\\ \hline
+
+Hardware & FR09  & The system must have a main On/Off switch\\ \hline
+
+\end{tabular}
+\caption{Hardware Requirements}
+\end{table}
+
 \subsection{Software Requirements}
 \label{sw_requirements}
+
+
+\begin{longtable}{|l|l|p{8cm}|}
+
+\hline
+Category & Requirement ID & Description \\ \hline
+
+Software & FR010  &  The embedded software must retrieve an item’s bin from the storage in at most 45 seconds if required by the application and the item bin is in the expected placement \\ \hline
+
+Software & FR011 & The embedded software must return an item’s bin to the storage in at most 30 seconds if required by the application and there is no unexpected bin in its place \\ \hline
+
+Software & FR012 &  The system must have an application for user interface\\ \hline
+
+Software & FR013 & The application must allow the user to select an item for retrieval\\ \hline
+
+Software & FR014 & The application must have an option of automatic storage\\ \hline
+
+Software & FR015 & The system must identify wrong storage bin placements\\ \hline
+
+Software & FR016 & The system must be able to reorganize storage bin placements\\ \hline
+
+Software & FR017 & The embedded software must check the ID of a storage bin if required by the application\\ \hline
+
+Software & FR018 & The system must update the stock estimation of a bin whenever it weights that storage bin\\ \hline
+
+Software & FR019 & The system should be able to visually identify 12 selected parts including screws, nuts, and corner supports with a minimum of 50\%\ mAP\\ \hline
+
+Software & FR020 & The stock estimation must have a precision of +/-4 items\\ \hline
+
+\caption{Software Requirements}\\
+\end{longtable}
 
 \section{Project Development}
 \label{development}
